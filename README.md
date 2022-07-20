@@ -40,7 +40,7 @@ const postCreateSchema = {
 };
 ```
 
-You will find that either `fastify-multer` not `@fastify/multipart` will process this schema correctly, unless you add a `preValidation` hook to convert your request body into the correct schema. I created `formzilla` to solve this exact problem.
+You will find that neither `fastify-multer` nor `@fastify/multipart` will process this schema correctly, unless you add a `preValidation` hook to convert your request body into the correct schema. I created `formzilla` to solve this exact problem.
 
 ```tsx
 import fastify, { FastifyInstance, FastifyRequest, FastifyReply, FastifyPluginOptions } from "fastify";
@@ -103,13 +103,13 @@ The `options` parameter for `formzilla` is the same as the `limits` configuratio
 
 ```tsx
 server.register(formDataParser, {
-  fieldNameSize?: number, // Max field name size (in bytes). Default: 100.
-  fieldSize?: number, // Max field value size (in bytes). Default: 1048576 (1MB).
-  fields?: number, // Max number of non-file fields. Default: Infinity.
-  fileSize?: number, // For multipart forms, the max file size (in bytes). Default: Infinity.
-  files?: number, // For multipart forms, the max number of file fields. Default: Infinity.
-  parts?: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
-  headerPairs?: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
+  fieldNameSize: number, // Max field name size (in bytes). Default: 100.
+  fieldSize: number, // Max field value size (in bytes). Default: 1048576 (1MB).
+  fields: number, // Max number of non-file fields. Default: Infinity.
+  fileSize: number, // For multipart forms, the max file size (in bytes). Default: Infinity.
+  files: number, // For multipart forms, the max number of file fields. Default: Infinity.
+  parts: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
+  headerPairs: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
 });
 ```
 
