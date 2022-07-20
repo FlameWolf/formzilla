@@ -2,6 +2,21 @@
 
 const busboy = require("busboy");
 
+class File {
+	fieldName;
+	fileName;
+	encoding;
+	mimeType;
+	data;
+	constructor(fileInfo) {
+		if (fileInfo) {
+			this.fileName = fileInfo.filename;
+			this.encoding = fileInfo.encoding;
+			this.mimeType = fileInfo.mimeType;
+		}
+	}
+}
+
 const formDataParser = async (instance, options) => {
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
 		const fileList = [];
@@ -9,11 +24,8 @@ const formDataParser = async (instance, options) => {
 		const formData = {};
 		bus.on("file", (fieldName, file, fileInfo) => {
 			const chunks = [];
-			const fileObject = {};
+			const fileObject = new File(fileInfo);
 			fileObject.fieldName = fieldName;
-			fileObject.fileName = fileInfo.filename;
-			fileObject.encoding = fileInfo.encoding;
-			fileObject.mimeType = fileInfo.mimeType;
 			file.on("data", data => chunks.push(data));
 			file.on("close", () => {
 				fileObject.data = Buffer.concat(chunks);
