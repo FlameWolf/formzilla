@@ -4,7 +4,7 @@
 
 # Why?
 
-Even though other plugins for the same purpose exist, like [@fastify/multipart][1] and [@fastify-multer][2], when dealing with mixed content, they don"t play well with JSON schemas which are Fastify"s built-in mechanism for request validation and documentation. `formzilla` is intended to work seamlessly with JSON schemas and [@fastify-swagger][3].
+Even though other plugins for the same purpose exist, like [@fastify/multipart][1] and [@fastify-multer][2], when dealing with mixed content, they don't play well with JSON schemas which are Fastify's built-in mechanism for request validation and documentation. `formzilla` is intended to work seamlessly with JSON schemas and [@fastify-swagger][3].
 
 [1]: https://github.com/fastify/fastify-multipart
 [2]: https://github.com/fox1t/fastify-multer
