@@ -1,0 +1,56 @@
+"use strict";
+
+const busboy = require("busboy");
+
+const formDataParser = async (instance, options) => {
+	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
+		const fileList = [];
+		const bus = busboy({ headers: message.headers, limits: options });
+		const formData = {};
+		bus.on("file", (fieldName, file, fileInfo) => {
+			const chunks = [];
+			const fileObject = {};
+			fileObject.fieldName = fieldName;
+			fileObject.fileName = fileInfo.filename;
+			fileObject.encoding = fileInfo.encoding;
+			fileObject.mimeType = fileInfo.mimeType;
+			file.on("data", data => chunks.push(data));
+			file.on("close", () => {
+				fileObject.data = Buffer.concat(chunks);
+				fileList.push(fileObject);
+				formData[fieldName] = JSON.stringify(fileInfo);
+			});
+		});
+		bus.on("field", (fieldName, fieldValue) => {
+			try {
+				formData[fieldName] = JSON.parse(fieldValue);
+			} catch (err) {
+				formData[fieldName] = fieldValue;
+			}
+		});
+		bus.on("close", () => {
+			request.__files__ = fileList;
+			done(null, formData);
+		});
+		bus.on("error", error => {
+			done(error);
+		});
+		message.pipe(bus);
+	});
+	instance.addHook("preHandler", async (request, reply) => {
+		const requestBody = request.body;
+		const requestFiles = request.__files__;
+		if (requestFiles?.length) {
+			for (const fileObject of requestFiles) {
+				const fieldName = fileObject.fieldName;
+				delete fileObject.fieldName;
+				delete requestBody.fieldName;
+				requestBody[fieldName] = fileObject;
+			}
+		}
+		delete request.__files__;
+	});
+};
+formDataParser[Symbol.for("skip-override")] = true;
+
+exports.default = formDataParser;
