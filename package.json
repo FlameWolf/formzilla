@@ -20,8 +20,15 @@
 		"multipart",
 		"multipart/form-data",
 		"form-data",
+		"form",
 		"content-type-parser",
 		"contentTypeParser",
-		"plugin"
+		"plugin",
+		"busboy",
+		"file",
+		"upload",
+		"json-schema",
+		"jsonSchema",
+		"@fastify/swagger"
 	]
 }
