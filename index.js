@@ -1,7 +1,7 @@
 "use strict";
 
 const busboy = require("busboy");
-
+class RouteSchemaMap extends Object {}
 class File {
 	fieldName;
 	fileName;
@@ -16,12 +16,13 @@ class File {
 		}
 	}
 }
-
 const formDataParser = async (instance, options) => {
+	const instanceSchemas = new RouteSchemaMap();
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
 		const fileList = [];
-		const bus = busboy({ headers: message.headers, limits: options });
 		const formData = {};
+		const schemaProps = instanceSchemas[request.url]?.properties;
+		const bus = busboy({ headers: message.headers, limits: options });
 		bus.on("file", (fieldName, file, fileInfo) => {
 			const chunks = [];
 			const fileObject = new File(fileInfo);
@@ -34,11 +35,16 @@ const formDataParser = async (instance, options) => {
 			});
 		});
 		bus.on("field", (fieldName, fieldValue) => {
-			try {
-				formData[fieldName] = JSON.parse(fieldValue);
-			} catch (err) {
-				formData[fieldName] = fieldValue;
+			if (schemaProps) {
+				const schemaType = schemaProps[fieldName]?.type;
+				if (schemaType !== "string") {
+					try {
+						formData[fieldName] = JSON.parse(fieldValue);
+						return;
+					} catch (err) {}
+				}
 			}
+			formData[fieldName] = fieldValue;
 		});
 		bus.on("close", () => {
 			request.__files__ = fileList;
@@ -48,6 +54,9 @@ const formDataParser = async (instance, options) => {
 			done(error);
 		});
 		message.pipe(bus);
+	});
+	instance.addHook("onRoute", async routeOptions => {
+		instanceSchemas[routeOptions.url] = routeOptions.schema?.body;
 	});
 	instance.addHook("preHandler", async (request, reply) => {
 		const requestBody = request.body;
