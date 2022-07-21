@@ -108,16 +108,17 @@ The `options` parameter for Formzilla is the same as the `limits` configuration 
 
 ```tsx
 server.register(formDataParser, {
-  fieldNameSize: number, // Max field name size (in bytes). Default: 100.
-  fieldSize: number, // Max field value size (in bytes). Default: 1048576 (1MB).
-  fields: number, // Max number of non-file fields. Default: Infinity.
-  fileSize: number, // For multipart forms, the max file size (in bytes). Default: Infinity.
-  files: number, // For multipart forms, the max number of file fields. Default: Infinity.
-  parts: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
-  headerPairs: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
+  fieldNameSize?: number, // Max field name size (in bytes). Default: 100.
+  fieldSize?: number, // Max field value size (in bytes). Default: 1048576 (1MB).
+  fields?: number, // Max number of non-file fields. Default: Infinity.
+  fileSize?: number, // For multipart forms, the max file size (in bytes). Default: Infinity.
+  files?: number, // For multipart forms, the max number of file fields. Default: Infinity.
+  parts?: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
+  headerPairs?: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
 });
 ```
 
 # Caveats
 
-File data will not be available in `request.body` until the `preHandler` request lifecycle stage. So if you want to access the files inside a `preValidation` hook, use `request.__files__` instead. This is a temporary property that gets removed from the request object at the `preHandler` stage. It is done this way for security purposes.
+1. Schema composition (`allOf`, `anyOf`, `oneOf`, `not`) can be tricky when a composed property may accept a string value. Composed properties are always parsed using `JSON.parse(&#x2026;)`, so you will have to wrap the value in single/double quotation marks or backticks.
+2. File data will not be available in `request.body` until the `preHandler` request lifecycle stage. So if you want to access the files inside a `preValidation` hook, use `request.__files__` instead. This is a temporary property that gets removed from the request object at the `preHandler` stage. It is done this way for security purposes.
