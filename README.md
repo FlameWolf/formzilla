@@ -120,5 +120,5 @@ server.register(formDataParser, {
 
 # Caveats
 
-1. Schema composition (`allOf`, `anyOf`, `oneOf`, `not`) can be tricky when a composed property may accept a string value. Composed properties are always parsed using `JSON.parse(&#x2026;)`, so you will have to wrap the value in single/double quotation marks or backticks.
+1. Schema composition (`allOf`, `anyOf`, `oneOf`, `not`) can be tricky when a composed property may accept a string value. Composed properties are always parsed using `JSON.parse(...)`, so you will have to wrap the value in single/double quotation marks or backticks.
 2. File data will not be available in `request.body` until the `preHandler` request lifecycle stage. So if you want to access the files inside a `preValidation` hook, use `request.__files__` instead. This is a temporary property that gets removed from the request object at the `preHandler` stage. It is done this way for security purposes.
