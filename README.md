@@ -43,12 +43,7 @@ const postCreateSchema = {
 You will find that neither `@fastify/multipart` nor `fastify-multer` will process this schema correctly, unless you add a `preValidation` hook to convert your request body into the correct schema. I created Formzilla to solve this exact problem.
 
 ```tsx
-import fastify, {
-  FastifyInstance,
-  FastifyRequest,
-  FastifyReply,
-  FastifyPluginOptions
-} from "fastify";
+import fastify, { FastifyInstance, FastifyRequest, FastifyReply, FastifyPluginOptions } from "fastify";
 import fastifySwagger from "@fastify/swagger";
 import formDataParser from "formzilla";
 
