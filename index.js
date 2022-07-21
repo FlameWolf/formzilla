@@ -65,7 +65,6 @@ const formDataParser = async (instance, options) => {
 			for (const fileObject of requestFiles) {
 				const fieldName = fileObject.fieldName;
 				delete fileObject.fieldName;
-				delete requestBody.fieldName;
 				requestBody[fieldName] = fileObject;
 			}
 		}
