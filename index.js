@@ -1,7 +1,6 @@
 "use strict";
 
 const busboy = require("busboy");
-class RouteSchemaMap extends Object {}
 class File {
 	fieldName;
 	fileName;
@@ -17,11 +16,10 @@ class File {
 	}
 }
 const formDataParser = async (instance, options) => {
-	const routeSchemas = new RouteSchemaMap();
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
 		const fileList = [];
 		const formData = {};
-		const schemaProps = routeSchemas[request.url]?.properties;
+		const schemaProps = request.context.schema?.body?.properties;
 		const bus = busboy({ headers: message.headers, limits: options });
 		bus.on("file", (fieldName, file, fileInfo) => {
 			const chunks = [];
@@ -54,9 +52,6 @@ const formDataParser = async (instance, options) => {
 			done(error);
 		});
 		message.pipe(bus);
-	});
-	instance.addHook("onRoute", async routeOptions => {
-		routeSchemas[routeOptions.url] = routeOptions.schema?.body;
 	});
 	instance.addHook("preHandler", async (request, reply) => {
 		const requestBody = request.body;
