@@ -4,15 +4,15 @@ import { Limits, FileInfo } from "busboy";
 interface Dictionary extends Object {
 	[key: string | symbol]: any;
 }
-interface FormDataParserPluginOptions extends Limits, FastifyPluginOptions {}
-declare type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOptions> & Dictionary;
-declare class File {
-	fieldName?: string;
-	fileName: string;
+export interface FormDataParserPluginOptions extends Limits, FastifyPluginOptions {}
+export declare type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOptions> & Dictionary;
+export declare class File {
+	field?: string;
+	name: string;
 	encoding: string;
 	mimeType: string;
 	data: Buffer;
-	constructor(fileInfo?: FileInfo);
+	constructor(name?: string, info?: FileInfo);
 }
 declare module "fastify" {
 	interface FastifyRequest {

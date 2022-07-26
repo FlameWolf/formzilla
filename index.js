@@ -2,51 +2,48 @@
 
 const busboy = require("busboy");
 class File {
-	fieldName;
-	fileName;
+	field;
+	name;
 	encoding;
 	mimeType;
 	data;
-	constructor(fileInfo) {
-		if (fileInfo) {
-			this.fileName = fileInfo.filename;
-			this.encoding = fileInfo.encoding;
-			this.mimeType = fileInfo.mimeType;
+	constructor(name, info) {
+		this.field = name;
+		if (info) {
+			this.name = info.filename;
+			this.encoding = info.encoding;
+			this.mimeType = info.mimeType;
 		}
 	}
 }
 const formDataParser = async (instance, options) => {
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
-		const fileList = [];
-		const formData = {};
-		const schemaProps = request.context.schema?.body?.properties;
+		const files = [];
+		const body = {};
+		const props = request.context.schema?.body?.properties;
 		const bus = busboy({ headers: message.headers, limits: options });
-		bus.on("file", (fieldName, file, fileInfo) => {
-			const chunks = [];
-			const fileObject = new File(fileInfo);
-			fileObject.fieldName = fieldName;
-			file.on("data", data => chunks.push(data));
-			file.on("close", () => {
-				fileObject.data = Buffer.concat(chunks);
-				fileList.push(fileObject);
-				formData[fieldName] = JSON.stringify(fileInfo);
+		bus.on("file", (name, stream, info) => {
+			const data = [];
+			const file = new File(name, info);
+			stream.on("data", chunk => data.push(chunk));
+			stream.on("close", () => {
+				file.data = Buffer.concat(data);
+				files.push(file);
+				body[name] = JSON.stringify(info);
 			});
 		});
-		bus.on("field", (fieldName, fieldValue) => {
-			if (schemaProps) {
-				const schemaType = schemaProps[fieldName]?.type;
-				if (schemaType !== "string") {
-					try {
-						formData[fieldName] = JSON.parse(fieldValue);
-						return;
-					} catch (err) {}
-				}
+		bus.on("field", (name, value) => {
+			if (props && props[name]?.type !== "string") {
+				try {
+					body[name] = JSON.parse(value);
+					return;
+				} catch (err) {}
 			}
-			formData[fieldName] = fieldValue;
+			body[name] = value;
 		});
 		bus.on("close", () => {
-			request.__files__ = fileList;
-			done(null, formData);
+			request.__files__ = files;
+			done(null, body);
 		});
 		bus.on("error", error => {
 			done(error);
@@ -54,13 +51,13 @@ const formDataParser = async (instance, options) => {
 		message.pipe(bus);
 	});
 	instance.addHook("preHandler", async (request, reply) => {
-		const requestBody = request.body;
-		const requestFiles = request.__files__;
-		if (requestFiles?.length) {
-			for (const fileObject of requestFiles) {
-				const fieldName = fileObject.fieldName;
-				delete fileObject.fieldName;
-				requestBody[fieldName] = fileObject;
+		const body = request.body;
+		const files = request.__files__;
+		if (files?.length) {
+			for (const fileObject of files) {
+				const field = fileObject.field;
+				delete fileObject.field;
+				body[field] = fileObject;
 			}
 		}
 		delete request.__files__;
@@ -68,4 +65,5 @@ const formDataParser = async (instance, options) => {
 };
 formDataParser[Symbol.for("skip-override")] = true;
 
+exports.File = File;
 exports.default = formDataParser;
