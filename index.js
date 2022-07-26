@@ -1,7 +1,7 @@
 "use strict";
 
 const busboy = require("busboy");
-class File {
+class FileInternal {
 	field;
 	name;
 	encoding;
@@ -24,7 +24,7 @@ const formDataParser = async (instance, options) => {
 		const bus = busboy({ headers: message.headers, limits: options });
 		bus.on("file", (name, stream, info) => {
 			const data = [];
-			const file = new File(name, info);
+			const file = new FileInternal(name, info);
 			stream.on("data", chunk => data.push(chunk));
 			stream.on("close", () => {
 				file.data = Buffer.concat(data);

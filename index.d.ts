@@ -5,7 +5,7 @@ interface Dictionary extends Object {
 	[key: string | symbol]: any;
 }
 export interface FormDataParserPluginOptions extends Limits, FastifyPluginOptions {}
-export interface IFile {
+export interface File {
 	field?: string;
 	name: string;
 	encoding: string;
@@ -15,7 +15,7 @@ export interface IFile {
 export declare type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOptions> & Dictionary;
 declare module "fastify" {
 	interface FastifyRequest {
-		__files__?: Array<IFile>;
+		__files__?: Array<File>;
 	}
 }
 declare const formDataParser: FormDataParserPlugin;
