@@ -1,22 +1,21 @@
 import { FastifyPluginAsync, FastifyPluginOptions } from "fastify";
-import { Limits, FileInfo } from "busboy";
+import { Limits } from "busboy";
 
 interface Dictionary extends Object {
 	[key: string | symbol]: any;
 }
 export interface FormDataParserPluginOptions extends Limits, FastifyPluginOptions {}
-export declare type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOptions> & Dictionary;
-export declare class File {
+export interface IFile {
 	field?: string;
 	name: string;
 	encoding: string;
 	mimeType: string;
 	data: Buffer;
-	constructor(name?: string, info?: FileInfo);
 }
+export declare type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOptions> & Dictionary;
 declare module "fastify" {
 	interface FastifyRequest {
-		__files__?: Array<File>;
+		__files__?: Array<IFile>;
 	}
 }
 declare const formDataParser: FormDataParserPlugin;

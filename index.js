@@ -65,5 +65,4 @@ const formDataParser = async (instance, options) => {
 };
 formDataParser[Symbol.for("skip-override")] = true;
 
-exports.File = File;
 exports.default = formDataParser;
