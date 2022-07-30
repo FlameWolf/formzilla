@@ -6,9 +6,6 @@ Formzilla is a [Fastify](http://fastify.io/) plugin to handle `multipart/form-da
 
 Even though other plugins for the same purpose exist, like [@fastify/multipart][1] and [fastify-multer][2], when dealing with mixed content, they don't play well with JSON schemas which are Fastify's built-in mechanism for request validation and documentation. Formzilla is intended to work seamlessly with JSON schemas and [@fastify-swagger][3].
 
-[1]: https://github.com/fastify/fastify-multipart
-[2]: https://github.com/fox1t/fastify-multer
-[3]: https://github.com/fastify/fastify-swagger
 
 # Example
 
@@ -77,7 +74,9 @@ server.register(
             fileName: "flame-wolf.png",
             encoding: "7bit",
             mimeType: "image/png",
-            data: <Buffer>
+			path?: <string>,		// Only when using DiscStorage
+			stream?: <Readable>		// Only when using StreamStorage
+            data?: <Buffer>			// Only when using BufferStorage
           }
         }
         */
@@ -89,30 +88,84 @@ server.register(
 );
 ```
 
+# Installation
+
+```sh
+npm install formzilla
+```
+
 # Important
 
 I guess this goes without saying, but you must register the plugin before registering your application routes.
 
 ## API
 
+### Breaking changes from version 1
+
+1. Formzilla 1.x `options` have been moved to `options.limits` in Formzilla 2.x.
+2. File content is stored by default in `file.stream` as a `Readable` in Formzilla 2.x whereas in Formzilla 1.x it was stored in `file.data` as a `Buffer`.
+
 ### Options
 
-The `options` parameter for Formzilla is the same as the `limits` configuration option for [busboy][4].
+These are the valid keys for the `options` object parameter accepted by Formzilla:
 
-[4]: https://github.com/mscdex/busboy
+- `limits`: Same as the `limits` configuration option for [busboy][4].
 
-```tsx
-server.register(formDataParser, {
-  fieldNameSize?: number, // Max field name size (in bytes). Default: 100.
-  fieldSize?: number, // Max field value size (in bytes). Default: 1048576 (1MB).
-  fields?: number, // Max number of non-file fields. Default: Infinity.
-  fileSize?: number, // For multipart forms, the max file size (in bytes). Default: Infinity.
-  files?: number, // For multipart forms, the max number of file fields. Default: Infinity.
-  parts?: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
-  headerPairs?: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
-});
-```
+  ```tsx
+  {
+    fieldNameSize?: number, // Max field name size (in bytes). Default: 100.
+    fieldSize?: number, // Max field value size (in bytes). Default: 1048576 (1MB).
+    fields?: number, // Max number of non-file fields. Default: Infinity.
+    fileSize?: number, // For multipart forms, the max file size (in bytes). Default: Infinity.
+    files?: number, // For multipart forms, the max number of file fields. Default: Infinity.
+    parts?: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
+    headerPairs?: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
+  };
+  ```
+
+- `storage`: Where to store the files, if any, included in the request. Formzilla provides the following built-in options. It is possible to write custom storage plugins of your own.
+  - `StreamStorage`: The default storage option used by Formzilla. Stores file contents as a `Readable` in the `stream` property of the file. Example:
+    ```tsx
+    server.register(formDataParser, {
+      storage: new StreamStorage()
+    });
+    ```
+  - `BufferStorage`: Emulates Formzilla 1.x behaviour by storing file contents as a `Buffer` in the `data` property of the file. Example:
+    ```tsx
+    server.register(formDataParser, {
+      storage: new BufferStorage()
+    });
+    ```
+  - `DiscStorage`: Saves the file to the disc. Accepts an parameter that can be either a `FileSaveTarget` or a function that accepts a `FileInternal` parameter and returns a `FileSaveTarget`. By default, Formzilla will save the file to the operating system's TEMP directory. Example:
+    ```tsx
+    server.register(formDataParser, {
+      storage: new DiscStorage((file) => {
+      	return {
+          directory: path.join(__dirname, "public"),
+          fileName: file.originalNAme.toUpperCase()
+        }
+      })
+    });
+    ```
+  - `CallbackStorage`: For advanced users. Accepts a callback function that accepts a `Readable` parameter and consumes it. EXample:
+    ```tsx
+    server.register(formDataParser, {
+      storage: new CallbackStorage((stream) => {
+        stream.on("data" => void 0);
+        stream.on("close", () => console.log("Stream consumed successfully"));
+      })
+    });
+    ```
+# Recommendations
+
+Both `StreamStorage` and `BufferStorage` will cause files to accumulate in memory and hence make your endpoint a potential target for DDoS attacks. `CallbackStorage` must cosume the stream inside the callback or it will break the application. It is recommended only if you are familiar with streams in NodeJS and want to manipulate the stream in some way instead of sending it to the response body. It's recommended to use `DiscStorage` to temporarily store an incoming file, upload it to a cloud server like [Cloudinary][5] from your request handler, and then delete the temporary file.
 
 # Caveats
 
 - File data will not be available in `request.body` until the `preHandler` request lifecycle stage. So if you want to access the files inside a `preValidation` hook, use `request.__files__` instead. This is a temporary property that gets removed from the request object at the `preHandler` stage. It is done this way for security purposes.
+
+[1]: https://github.com/fastify/fastify-multipart
+[2]: https://github.com/fox1t/fastify-multer
+[3]: https://github.com/fastify/fastify-swagger
+[4]: https://github.com/mscdex/busboy
+[5]: https://cloudinary.com
