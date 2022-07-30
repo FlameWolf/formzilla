@@ -19,7 +19,7 @@ tap.test("should store file as stream and populate request body", async t => {
 			t.type(requestBody.address, "object");
 			t.equal(reply.statusCode, 200);
 		});
-		const [form, req] = await setup(instance);
+		const req = await setup(instance);
 		const [res] = await once(req, "response");
 		res.resume();
 	} catch (err) {

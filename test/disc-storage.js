@@ -5,7 +5,7 @@ const tap = require("tap");
 const { DiscStorage } = require("../DiscStorage");
 const { once } = require("events");
 
-tap.test("should store file as stream and populate request body", async t => {
+tap.test("should save file to disc and populate request body", async t => {
 	const instance = require("fastify").fastify();
 	t.teardown(async () => {
 		await instance.close();
@@ -19,7 +19,7 @@ tap.test("should store file as stream and populate request body", async t => {
 			t.type(requestBody.address, "object");
 			t.equal(reply.statusCode, 200);
 		});
-		const [form, req] = await setup(instance, { storage: new DiscStorage() });
+		const req = await setup(instance, { storage: new DiscStorage() });
 		const [res] = await once(req, "response");
 		res.resume();
 	} catch (err) {

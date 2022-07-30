@@ -6,7 +6,7 @@ const { CallbackStorage } = require("../CallbackStorage");
 const { PassThrough } = require("stream");
 const { once } = require("events");
 
-tap.test("should store file as stream and populate request body", async t => {
+tap.test("should pass file stream to callback and populate request body", async t => {
 	const instance = require("fastify").fastify();
 	t.teardown(async () => {
 		await instance.close();
@@ -20,7 +20,7 @@ tap.test("should store file as stream and populate request body", async t => {
 			t.type(requestBody.address, "object");
 			t.equal(reply.statusCode, 200);
 		});
-		const [form, req] = await setup(instance, {
+		const req = await setup(instance, {
 			storage: new CallbackStorage(source => {
 				const delegateStream = new PassThrough();
 				source.on("data", chunk => delegateStream.push(chunk));

@@ -63,6 +63,5 @@ module.exports = async function (instance, options = undefined) {
 			street: "First Street"
 		})
 	);
-	form.pipe(req);
-	return [form, req];
+	return form.pipe(req);
 };
