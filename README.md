@@ -112,7 +112,7 @@ These are the valid keys for the `options` object parameter accepted by Formzill
 - `limits`: Same as the `limits` configuration option for [busboy][4].
 
   ```tsx
-  {
+  const formLimits = {
     fieldNameSize?: number, // Max field name size (in bytes). Default: 100.
     fieldSize?: number, // Max field value size (in bytes). Default: 1048576 (1MB).
     fields?: number, // Max number of non-file fields. Default: Infinity.
@@ -121,6 +121,9 @@ These are the valid keys for the `options` object parameter accepted by Formzill
     parts?: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
     headerPairs?: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
   };
+  server.register(formDataParser, {
+    limits: formLimits
+  });
   ```
 
 - `storage`: Where to store the files, if any, included in the request. Formzilla provides the following built-in options. It is possible to write custom storage plugins of your own.
@@ -142,7 +145,7 @@ These are the valid keys for the `options` object parameter accepted by Formzill
       storage: new DiscStorage((file) => {
       	return {
           directory: path.join(__dirname, "public"),
-          fileName: file.originalNAme.toUpperCase()
+          fileName: file.originalName.toUpperCase()
         }
       })
     });
