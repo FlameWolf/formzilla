@@ -126,6 +126,7 @@ These are the valid keys for the `options` object parameter accepted by Formzill
     ```
 
 -   `storage`: Where to store the files, if any, included in the request. Formzilla provides the following built-in options. It is possible to write custom storage plugins of your own.
+
     -   `StreamStorage`: The default storage option used by Formzilla. Stores file contents as a `Readable` in the `stream` property of the file. Example:
         ```tsx
         server.register(formDataParser, {
@@ -138,7 +139,7 @@ These are the valid keys for the `options` object parameter accepted by Formzill
         	storage: new BufferStorage()
         });
         ```
-    -   `DiscStorage`: Saves the file to the disc. Accepts an parameter that can be either a `FileSaveTarget` or a function that accepts a `FileInternal` parameter and returns a `FileSaveTarget`. By default, Formzilla will save the file to the operating system's TEMP directory. Example:
+    -   `DiscStorage`: Saves the file to the disc. Accepts a parameter that can be either a `FileSaveTarget` or a function that accepts a `FileInternal` parameter and returns a `FileSaveTarget`. By default, Formzilla will save the file to the operating system's TEMP directory. Example:
         ```tsx
         server.register(formDataParser, {
         	storage: new DiscStorage(file => {
@@ -149,19 +150,29 @@ These are the valid keys for the `options` object parameter accepted by Formzill
         	})
         });
         ```
-    -   `CallbackStorage`: For advanced users. Accepts a callback function that accepts a `Readable` parameter and consumes it. EXample:
+    -   `CallbackStorage`: For advanced users. Accepts a callback function that takes three parameters: a `string`, a `Readable`, and a `FileInfo`. The callback function must consume the `Readable` and return a `FileInternal`. EXample:
+
         ```tsx
+        // The below callback works exactly like BufferStorage.
+        // The FileInternal object returned by it will have its
+        // `data` field populated with the file content as a Buffer.
+
         server.register(formDataParser, {
-          storage: new CallbackStorage((stream) => {
-            stream.on("data" => void 0);
-            stream.on("close", () => console.log("Stream consumed successfully"));
-          })
+        	storage: new CallbackStorage((name, stream, info) => {
+        		const file = new FileInternal(name, info);
+        		const data = [];
+        		stream.on("data", chunk => data.push(chunk));
+        		stream.on("close", () => {
+        			file.data = Buffer.concat(data);
+        		});
+        		return file;
+        	})
         });
         ```
 
 # Recommendations
 
-Both `StreamStorage` and `BufferStorage` will cause files to accumulate in memory and hence make your endpoint a potential target for DDoS attacks. `CallbackStorage` must cosume the stream inside the callback or it will break the application. It is recommended only if you are familiar with streams in NodeJS and want to manipulate the stream in some way instead of sending it to the response body. It's recommended to use `DiscStorage` to temporarily store an incoming file, upload it to a cloud server like [Cloudinary][5] from your request handler, and then delete the temporary file.
+Both `StreamStorage` and `BufferStorage` will cause files to accumulate in memory and hence make your endpoint a potential target for DDoS attacks. `CallbackStorage` must cosume the stream inside the callback or it will break the application. It is recommended only if you are familiar with streams in NodeJS and want to manipulate the stream in some way before sending it to the response body. It's recommended to use `DiscStorage` to temporarily store an incoming file, upload it to a cloud server like [Cloudinary][5] from your request handler, and then delete the temporary file.
 
 # Caveats
 
