@@ -3,7 +3,7 @@
 const setup = require("./setup");
 const tap = require("tap");
 const { CallbackStorage } = require("../CallbackStorage");
-const { PassThrough } = require("stream");
+const { FileInternal } = require("../FileInternal");
 const { once } = require("events");
 
 tap.test("should pass file stream to callback and populate request body", async t => {
@@ -21,12 +21,14 @@ tap.test("should pass file stream to callback and populate request body", async 
 			t.equal(reply.statusCode, 200);
 		});
 		const req = await setup(instance, {
-			storage: new CallbackStorage(source => {
-				const delegateStream = new PassThrough();
-				source.on("data", chunk => delegateStream.push(chunk));
-				source.on("end", () => {
-					t.pass("stream consumed successfully");
+			storage: new CallbackStorage((name, stream, info) => {
+				const file = new FileInternal(name, info);
+				const data = [];
+				stream.on("data", chunk => data.push(chunk));
+				stream.on("close", () => {
+					file.data = Buffer.concat(data);
 				});
+				return file;
 			})
 		});
 		const [res] = await once(req, "response");
