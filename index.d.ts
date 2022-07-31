@@ -1,9 +1,18 @@
-import { FastifyPluginAsync, FastifyPluginOptions } from "fastify";
-import { Limits, FileInfo } from "busboy";
 import { Readable } from "stream";
+import { FileInfo, Limits } from "busboy";
+import { FastifyPluginOptions, FastifyPluginAsync } from "fastify";
 
-interface Dictionary extends Object {
+export interface Dictionary extends Object {
 	[key: string | symbol]: any;
+}
+export interface File {
+	field: string | undefined;
+	originalName: string;
+	encoding: string;
+	mimeType: string;
+	path: string | undefined;
+	stream: Readable | undefined;
+	data: Buffer | undefined;
 }
 export interface StorageOption {
 	process: (name: string, stream: Readable, info: FileInfo) => File;
@@ -14,16 +23,7 @@ export interface FileSaveTarget {
 }
 export interface FormDataParserPluginOptions extends FastifyPluginOptions {
 	limits?: Limits;
-	storage: StorageOption;
-}
-export interface File {
-	field: string | undefined;
-	originalName: string;
-	encoding: string;
-	mimeType: string;
-	path: string | undefined;
-	stream: Readable | undefined;
-	data: Buffer | undefined;
+	storage?: StorageOption;
 }
 export declare type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOptions> & Dictionary;
 declare module "fastify" {

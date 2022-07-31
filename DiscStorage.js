@@ -1,9 +1,9 @@
 "use strict";
 
 const { FileInternal } = require("./FileInternal");
+const path = require("path");
 const os = require("os");
 const fs = require("fs");
-const path = require("path");
 class DiscStorage {
 	target;
 	constructor(target) {

@@ -1,6 +1,6 @@
-import { FileInfo } from "busboy";
-import { Readable } from "stream";
 import { File } from "./index";
+import { Readable } from "stream";
+import { FileInfo } from "busboy";
 
 export declare class FileInternal implements File {
 	field: string | undefined;

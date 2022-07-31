@@ -1,7 +1,7 @@
 "use strict";
 
-const { PassThrough } = require("stream");
 const { FileInternal } = require("./FileInternal");
+const { PassThrough } = require("stream");
 class StreamStorage {
 	process(name, stream, info) {
 		const file = new FileInternal(name, info);
