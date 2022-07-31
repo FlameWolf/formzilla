@@ -65,20 +65,20 @@ server.register(
 			(request: FastifyRequest, reply: FastifyReply) => {
 				console.log(request.body);
 				/*
-        request.body will look like this:
-        {
-          content: "Test.",
-          poll: { first: "Option 1", second: "Option 2" },
-          media: {
-            fileName: "flame-wolf.png",
-            encoding: "7bit",
-            mimeType: "image/png",
-			path?: <string>,		// Only when using DiscStorage
-			stream?: <Readable>		// Only when using StreamStorage
-            data?: <Buffer>			// Only when using BufferStorage
-          }
-        }
-        */
+				request.body will look like this:
+				{
+					content: "Test.",
+					poll: { first: "Option 1", second: "Option 2" },
+					media: {
+						fileName: "flame-wolf.png",
+						encoding: "7bit",
+						mimeType: "image/png",
+						path?: <string>,		// Only when using DiscStorage
+						stream?: <Readable>		// Only when using StreamStorage
+						data?: <Buffer>			// Only when using BufferStorage
+					}
+				}
+				*/
 				reply.status(200).send();
 			}
 		);
