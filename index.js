@@ -2,24 +2,26 @@
 
 const busboy = require("busboy");
 const { StreamStorage } = require("./StreamStorage");
+const tryParse = value => {
+	try {
+		return JSON.parse(value);
+	} catch {
+		return value;
+	}
+};
 const formDataParser = async (instance, options) => {
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
 		const files = [];
 		const body = {};
 		const props = request.context.schema?.body?.properties;
+		const parseField = props ? (name, value) => (props[name]?.type === "string" ? value : tryParse(value)) : (name, value) => value;
 		const bus = busboy({ headers: message.headers, limits: options?.limits });
 		bus.on("file", (name, stream, info) => {
 			files.push((options.storage || new StreamStorage()).process(name, stream, info));
 			body[name] = JSON.stringify(info);
 		});
 		bus.on("field", (name, value) => {
-			if (props && props[name]?.type !== "string") {
-				try {
-					body[name] = JSON.parse(value);
-					return;
-				} catch (err) {}
-			}
-			body[name] = value;
+			body[name] = parseField(name, value);
 		});
 		bus.on("close", () => {
 			request.__files__ = files;

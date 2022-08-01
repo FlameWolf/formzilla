@@ -26,6 +26,7 @@ export interface FormDataParserPluginOptions extends FastifyPluginOptions {
 	storage?: StorageOption;
 }
 export declare type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOptions> & Dictionary;
+export declare type FieldParser = (name: string, value: string) => string;
 declare module "fastify" {
 	interface FastifyRequest {
 		__files__?: Array<File>;
