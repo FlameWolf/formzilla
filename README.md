@@ -112,13 +112,13 @@ These are the valid keys for the `options` object parameter accepted by Formzill
 
     ```tsx
     const formLimits = {
-    	fieldNameSize: number, // Max field name size (in bytes). Default: 100.
-    	fieldSize: number, // Max field value size (in bytes). Default: 1048576 (1MB).
-    	fields: number, // Max number of non-file fields. Default: Infinity.
-    	fileSize: number, // For multipart forms, the max file size (in bytes). Default: Infinity.
-    	files: number, // For multipart forms, the max number of file fields. Default: Infinity.
-    	parts: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
-    	headerPairs: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
+    	fieldNameSize?: number, // Max field name size (in bytes). Default: 100.
+    	fieldSize?: number, // Max field value size (in bytes). Default: 1048576 (1MB).
+    	fields?: number, // Max number of non-file fields. Default: Infinity.
+    	fileSize?: number, // For multipart forms, the max file size (in bytes). Default: Infinity.
+    	files?: number, // For multipart forms, the max number of file fields. Default: Infinity.
+    	parts?: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
+    	headerPairs?: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
     };
     server.register(formDataParser, {
     	limits: formLimits
