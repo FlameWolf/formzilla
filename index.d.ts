@@ -14,8 +14,9 @@ export interface File {
 	stream: Readable | undefined;
 	data: Buffer | undefined;
 }
+export declare type FileHandler = (name: string, stream: Readable, info: FileInfo) => File | Promise<File>;
 export interface StorageOption {
-	process: (name: string, stream: Readable, info: FileInfo) => File;
+	process: FileHandler;
 }
 export interface FileSaveTarget {
 	directory?: string;

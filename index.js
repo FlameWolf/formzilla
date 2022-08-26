@@ -12,21 +12,23 @@ const tryParse = value => {
 const formDataParser = async (instance, options) => {
 	const { limits, storage = new StreamStorage() } = options;
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
-		const files = [];
+		const results = [];
 		const body = {};
 		const props = request.context.schema?.body?.properties;
 		const parseField = props ? (name, value) => (props[name]?.type === "string" ? value : tryParse(value)) : (name, value) => value;
 		const bus = busboy({ headers: message.headers, limits });
 		bus.on("file", (name, stream, info) => {
-			files.push(storage.process(name, stream, info));
+			results.push(Promise.resolve(storage.process(name, stream, info)));
 			body[name] = JSON.stringify(info);
 		});
 		bus.on("field", (name, value) => {
 			body[name] = parseField(name, value);
 		});
 		bus.on("close", () => {
-			request.__files__ = files;
-			done(null, body);
+			Promise.all(results).then(files => {
+				request.__files__ = files;
+				done(null, body);
+			});
 		});
 		bus.on("error", error => {
 			done(error);
