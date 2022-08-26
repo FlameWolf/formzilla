@@ -150,22 +150,28 @@ These are the valid keys for the `options` object parameter accepted by Formzill
         	})
         });
         ```
-    -   `CallbackStorage`: For advanced users. Accepts a callback function that takes three parameters: a `string`, a `Readable`, and a `FileInfo`. The callback function must consume the `Readable` and return a `FileInternal`. EXample:
+    -   `CallbackStorage`: For advanced users. Accepts a callback function that takes three parameters: a `string`, a `Readable`, and a `FileInfo`. The callback function must consume the `Readable` and return either a `FileInternal` or a promise that resolves to a `FileInternal`. Example:
 
         ```tsx
-        // The below callback works exactly like BufferStorage.
-        // The FileInternal object returned by it will have its
-        // `data` field populated with the file content as a Buffer.
+        // The following example uploads the incoming stream
+        // directly to a cloud server. The call to `resolve` is
+        // nested inside the cloud API's callback function to ensure
+        // that the `path` property of the `FileInternal` object
+        // is populated correctly.
 
         server.register(formDataParser, {
         	storage: new CallbackStorage((name, stream, info) => {
-        		const file = new FileInternal(name, info);
-        		const data = [];
-        		stream.on("data", chunk => data.push(chunk));
-        		stream.on("close", () => {
-        			file.data = Buffer.concat(data);
+        		return new Promise((resolve, reject) => {
+        			const file = new FileInternal(name, info);
+        			var uploader = cloudinary.v2.uploader.upload_stream((err, res) => {
+        				if (err) {
+        					reject(err);
+        				}
+        				file.path = res?.secure_url;
+        				resolve(file);
+        			});
+        			stream.pipe(uploader);
         		});
-        		return file;
         	})
         });
         ```
