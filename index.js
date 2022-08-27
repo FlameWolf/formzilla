@@ -18,7 +18,7 @@ const formDataParser = async (instance, options) => {
 		const parseField = props ? (name, value) => (props[name]?.type === "string" ? value : tryParse(value)) : (name, value) => value;
 		const bus = busboy({ headers: message.headers, limits });
 		bus.on("file", (name, stream, info) => {
-			results.push(Promise.resolve(storage.process(name, stream, info)));
+			results.push(storage.process(name, stream, info));
 			body[name] = JSON.stringify(info);
 		});
 		bus.on("field", (name, value) => {
