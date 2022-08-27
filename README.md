@@ -76,6 +76,7 @@ server.register(
 						path?: <string>,		// Only when using DiscStorage
 						stream?: <Readable>		// Only when using StreamStorage
 						data?: <Buffer>			// Only when using BufferStorage
+						error?: <Error>			// Only if any errors occur during processing
 					}
 				}
 				*/
@@ -139,7 +140,7 @@ These are the valid keys for the `options` object parameter accepted by Formzill
         	storage: new BufferStorage()
         });
         ```
-    -   `DiscStorage`: Saves the file to the disc. Accepts a parameter that can be either a `FileSaveTarget` or a function that accepts a `FileInternal` parameter and returns a `FileSaveTarget`. By default, Formzilla will save the file to the operating system's TEMP directory. Example:
+    -   `DiscStorage`: Saves the file to the disc. Accepts a parameter that can be either a `formzilla.FileSaveTarget` or a function that accepts a `formzilla.File` parameter and returns a `formzilla.FileSaveTarget`. By default, Formzilla will save the file to the operating system's TEMP directory. Example:
         ```tsx
         server.register(formDataParser, {
         	storage: new DiscStorage(file => {
@@ -150,7 +151,7 @@ These are the valid keys for the `options` object parameter accepted by Formzill
         	})
         });
         ```
-    -   `CallbackStorage`: For advanced users. Accepts a callback function that takes three parameters: a `string`, a `Readable`, and a `FileInfo`. The callback function must consume the `Readable` and return either a `FileInternal` or a promise that resolves to a `FileInternal`. Example:
+    -   `CallbackStorage`: For advanced users. Accepts a callback function that takes three parameters: a `string`, a `Readable`, and a `busboy.FileInfo`. The callback function must consume the `Readable` and return either a `formzilla.File` or a promise that resolves to a `formzilla.File`. Example:
 
         ```tsx
         // The following example uploads the incoming stream
@@ -161,12 +162,10 @@ These are the valid keys for the `options` object parameter accepted by Formzill
 
         server.register(formDataParser, {
         	storage: new CallbackStorage((name, stream, info) => {
-        		return new Promise((resolve, reject) => {
+        		return new Promise(resolve => {
         			const file = new FileInternal(name, info);
         			var uploader = cloudinary.v2.uploader.upload_stream((err, res) => {
-        				if (err) {
-        					reject(err);
-        				}
+        				file.error = err;
         				file.path = res?.secure_url;
         				resolve(file);
         			});
