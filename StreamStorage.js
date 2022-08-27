@@ -1,16 +1,20 @@
 "use strict";
 
 const { FileInternal } = require("./FileInternal");
-const { PassThrough } = require("stream");
+const { PassThrough, finished } = require("stream");
+
 class StreamStorage {
 	process(name, stream, info) {
-		const file = new FileInternal(name, info);
-		const delegateStream = new PassThrough();
-		stream.on("data", chunk => delegateStream.push(chunk));
-		stream.on("close", () => {
-			file.stream = delegateStream;
+		return new Promise(resolve => {
+			const file = new FileInternal(name, info);
+			const delegateStream = new PassThrough();
+			stream.on("data", chunk => delegateStream.push(chunk));
+			finished(stream, err => {
+				file.error = err;
+				file.stream = delegateStream;
+				resolve(file);
+			});
 		});
-		return file;
 	}
 }
 

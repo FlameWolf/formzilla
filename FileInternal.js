@@ -8,6 +8,7 @@ class FileInternal {
 	path;
 	stream;
 	data;
+	error;
 	constructor(name, info) {
 		this.field = name;
 		this.originalName = info.filename;
