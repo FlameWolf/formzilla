@@ -8,13 +8,13 @@ class StreamStorage {
 		const file = new FileInternal(name, info);
 		const delegateStream = new PassThrough();
 		stream.on("data", chunk => delegateStream.push(chunk));
-		return new Promise(resolve => {
+		return new Promise(resolve =>
 			finished(stream, err => {
 				file.error = err;
 				file.stream = delegateStream;
 				resolve(file);
-			});
-		});
+			})
+		);
 	}
 }
 

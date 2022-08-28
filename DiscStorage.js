@@ -18,13 +18,13 @@ class DiscStorage {
 		const filePath = path.join(saveLocation?.directory || os.tmpdir(), saveLocation?.fileName || file.originalName);
 		const fileStream = fs.createWriteStream(filePath);
 		stream.pipe(fileStream);
-		return new Promise(resolve => {
+		return new Promise(resolve =>
 			finished(stream, err => {
 				file.error = err;
 				file.path = filePath;
 				resolve(file);
-			});
-		});
+			})
+		);
 	}
 }
 
