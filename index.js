@@ -36,7 +36,7 @@ const formDataParser = async (instance, options) => {
 		});
 		message.pipe(bus);
 	});
-	instance.addHook("preHandler", async (request, reply) => {
+	instance.addHook("preHandler", async request => {
 		const body = request.body;
 		const files = request.__files__;
 		if (files?.length) {
