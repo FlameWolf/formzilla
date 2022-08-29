@@ -6,37 +6,38 @@ const http = require("http");
 const path = require("path");
 const fs = require("fs");
 
-module.exports = async function (instance, options = undefined) {
+const requestSchema = {
+	consumes: ["multipart/form-data"],
+	body: {
+		type: "object",
+		properties: {
+			name: {
+				type: "string"
+			},
+			age: {
+				type: "integer"
+			},
+			avatar: {
+				type: "string",
+				format: "binary"
+			},
+			address: {
+				type: "object",
+				properties: {
+					id: { type: "string" },
+					street: { type: "string" }
+				},
+				required: ["id", "street"]
+			}
+		}
+	}
+};
+module.exports = async function (instance, options = undefined, includeSchema = true) {
 	instance.register(formDataParser, options);
 	instance.post(
 		"/",
 		{
-			schema: {
-				consumes: ["multipart/form-data"],
-				body: {
-					type: "object",
-					properties: {
-						name: {
-							type: "string"
-						},
-						age: {
-							type: "integer"
-						},
-						avatar: {
-							type: "string",
-							format: "binary"
-						},
-						address: {
-							type: "object",
-							properties: {
-								id: { type: "string" },
-								street: { type: "string" }
-							},
-							required: ["id", "street"]
-						}
-					}
-				}
-			}
+			schema: includeSchema && requestSchema
 		},
 		async (request, reply) => {
 			reply.status(200).send();
