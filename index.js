@@ -26,13 +26,13 @@ const formDataParser = async (instance, options) => {
 		bus.on("field", (name, value) => {
 			body[name] = parseField(name, value);
 		});
-		message.pipe(bus);
 		finished(bus, (err = null) => {
 			Promise.all(results).then(files => {
 				request.__files__ = files;
 				done(err, body);
 			});
 		});
+		message.pipe(bus);
 	});
 	instance.addHook("preHandler", async request => {
 		const body = request.body;
