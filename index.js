@@ -2,6 +2,7 @@
 
 const { StreamStorage } = require("./StreamStorage");
 const busboy = require("busboy");
+const { finished } = require("stream");
 
 const tryParse = value => {
 	try {
@@ -25,16 +26,13 @@ const formDataParser = async (instance, options) => {
 		bus.on("field", (name, value) => {
 			body[name] = parseField(name, value);
 		});
-		bus.on("close", () => {
+		message.pipe(bus);
+		finished(bus, (err = null) => {
 			Promise.all(results).then(files => {
 				request.__files__ = files;
-				done(null, body);
+				done(err, body);
 			});
 		});
-		bus.on("error", error => {
-			done(error);
-		});
-		message.pipe(bus);
 	});
 	instance.addHook("preHandler", async request => {
 		const body = request.body;
