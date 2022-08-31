@@ -43,7 +43,6 @@ tap.test("should read file save target from function", async t => {
 		const req = await setup(instance, {
 			storage: new DiscStorage(file => {
 				return {
-					directory: __dirname,
 					fileName: `${Date.now()}_${file.originalName}`
 				};
 			})
