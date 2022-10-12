@@ -100,6 +100,10 @@ I guess this goes without saying, but you must register the plugin before regist
 
 ## API
 
+### Breaking changes from version 2
+
+1. Formzilla 3.x requires Fastify version 4.8 or above. Use Formzilla 2.x with Fastify versions below 4.8.
+
 ### Breaking changes from version 1
 
 1. Formzilla 1.x `options` have been moved to `options.limits` in Formzilla 2.x.
