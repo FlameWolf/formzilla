@@ -16,7 +16,7 @@ const formDataParser = async (instance, options) => {
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
 		const results = [];
 		const body = {};
-		const props = request.context.schema?.body?.properties;
+		const props = request.routeSchema?.body?.properties;
 		const parseField = props ? (name, value) => (props[name]?.type === "string" ? value : tryParse(value)) : (name, value) => value;
 		const bus = busboy({ headers: message.headers, limits });
 		bus.on("file", (name, stream, info) => {

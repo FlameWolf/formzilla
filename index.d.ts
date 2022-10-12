@@ -32,6 +32,7 @@ export declare type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPlug
 declare module "fastify" {
 	interface FastifyRequest {
 		__files__?: Array<File>;
+		routeSchema: Dictionary | undefined;
 	}
 }
 declare const formDataParser: FormDataParserPlugin;
