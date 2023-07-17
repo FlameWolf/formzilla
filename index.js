@@ -18,7 +18,7 @@ const formDataParser = async (instance, options) => {
 		const body = {};
 		const props = request.routeSchema?.body?.properties;
 		const parseField = props ? (name, value) => (props[name]?.type === "string" ? value : tryParse(value)) : (name, value) => value;
-		const bus = busboy({ headers: message.headers, limits });
+		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
 		bus.on("file", (name, stream, info) => {
 			results.push(storage.process(name, stream, info));
 			body[name] = JSON.stringify(info);
