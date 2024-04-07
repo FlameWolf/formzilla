@@ -44,7 +44,7 @@ const formDataParser = async (instance, options) => {
 		const body = request.body;
 		const files = request.__files__;
 		if (files?.length) {
-			let newBody = {};
+			const newBody = {};
 			for (const file of files) {
 				const field = file.field;
 				delete file.field;
