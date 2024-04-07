@@ -21,7 +21,13 @@ const formDataParser = async (instance, options) => {
 		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
 		bus.on("file", (name, stream, info) => {
 			results.push(storage.process(name, stream, info));
-			body[name] = JSON.stringify(info);
+			if(!body[name]) {
+				body[name] = JSON.stringify(info);
+			} else if (body[name] && !Array.isArray(body[name])) {
+				body[name] = [body[name], JSON.stringify(info)];
+			} else {
+				body[name].push(JSON.stringify(info));
+			}
 		});
 		bus.on("field", (name, value) => {
 			body[name] = parseField(name, value);
@@ -38,11 +44,19 @@ const formDataParser = async (instance, options) => {
 		const body = request.body;
 		const files = request.__files__;
 		if (files?.length) {
+			let newBody = {};
 			for (const file of files) {
 				const field = file.field;
 				delete file.field;
-				body[field] = file;
+				if (!newBody[field]) {
+					newBody[field] = file;
+				} else if (newBody[field] && !Array.isArray(newBody[field])) {
+					newBody[field] = [newBody[field], file];
+				} else {
+					newBody[field].push(file);
+				}
 			}
+			Object.assign(body, newBody);
 		}
 		delete request.__files__;
 	});
