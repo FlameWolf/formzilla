@@ -21,7 +21,7 @@ const formDataParser = async (instance, options) => {
 		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
 		bus.on("file", (name, stream, info) => {
 			results.push(storage.process(name, stream, info));
-			const fileProp = body[name];
+			let fileProp = body[name];
 			if (!fileProp) {
 				body[name] = JSON.stringify(info);
 			} else if (!Array.isArray(fileProp)) {
@@ -49,7 +49,7 @@ const formDataParser = async (instance, options) => {
 			for (const file of files) {
 				const field = file.field;
 				delete file.field;
-				const fileProp = newBody[field];
+				let fileProp = newBody[field];
 				if (!fileProp) {
 					newBody[field] = file;
 				} else if (!Array.isArray(fileProp)) {
