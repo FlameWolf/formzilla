@@ -9,9 +9,8 @@ const http = require("http");
 const path = require("path");
 const fs = require("fs");
 
-
 async function sendRequest(instance) {
-    const form = new formData();
+	const form = new formData();
 	const req = http.request({
 		protocol: "http:",
 		hostname: "localhost",
@@ -23,10 +22,10 @@ async function sendRequest(instance) {
 	const filePath = path.join(__dirname, "chequer.png");
 	form.append("file", fs.createReadStream(filePath));
 	form.append("files", fs.createReadStream(filePath));
-    form.append("files", fs.createReadStream(filePath));
-    form.append("files", fs.createReadStream(filePath));
+	form.append("files", fs.createReadStream(filePath));
+	form.append("files", fs.createReadStream(filePath));
 	return form.pipe(req);
-};
+}
 
 tap.test("should allow multiple files in one field", async t => {
 	const instance = require("fastify").fastify();
@@ -38,11 +37,11 @@ tap.test("should allow multiple files in one field", async t => {
 			const requestBody = request.body;
 			t.isArray(requestBody.files);
 			t.ok(requestBody.files[0].stream instanceof Readable);
-            t.ok(requestBody.files[1].stream instanceof Readable);
+			t.ok(requestBody.files[1].stream instanceof Readable);
 			t.equal(reply.statusCode, 200);
 		});
 		await setup(instance, undefined, false);
-        const req = await sendRequest(instance);
+		const req = await sendRequest(instance);
 		const [res] = await once(req, "response");
 		res.resume();
 	} catch (err) {

@@ -12,12 +12,12 @@ const requestSchema = {
 				format: "binary"
 			},
 			files: {
-                type: "array",
-                items: {
-                    type: "string",
-                    format: "binary"
-                }
-            },
+				type: "array",
+				items: {
+					type: "string",
+					format: "binary"
+				}
+			}
 		}
 	}
 };

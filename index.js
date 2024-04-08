@@ -21,12 +21,13 @@ const formDataParser = async (instance, options) => {
 		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
 		bus.on("file", (name, stream, info) => {
 			results.push(storage.process(name, stream, info));
-			if(!body[name]) {
+			const fileProp = body[name];
+			if (!fileProp) {
 				body[name] = JSON.stringify(info);
-			} else if (body[name] && !Array.isArray(body[name])) {
-				body[name] = [body[name], JSON.stringify(info)];
+			} else if (!Array.isArray(fileProp)) {
+				fileProp = [fileProp, JSON.stringify(info)];
 			} else {
-				body[name].push(JSON.stringify(info));
+				fileProp.push(JSON.stringify(info));
 			}
 		});
 		bus.on("field", (name, value) => {
@@ -48,12 +49,13 @@ const formDataParser = async (instance, options) => {
 			for (const file of files) {
 				const field = file.field;
 				delete file.field;
-				if (!newBody[field]) {
+				const fileProp = newBody[field];
+				if (!fileProp) {
 					newBody[field] = file;
-				} else if (newBody[field] && !Array.isArray(newBody[field])) {
-					newBody[field] = [newBody[field], file];
+				} else if (!Array.isArray(fileProp)) {
+					fileProp = [fileProp, file];
 				} else {
-					newBody[field].push(file);
+					fileProp.push(file);
 				}
 			}
 			Object.assign(body, newBody);
