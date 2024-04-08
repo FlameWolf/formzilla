@@ -21,14 +21,16 @@ const formDataParser = async (instance, options) => {
 		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
 		bus.on("file", (name, stream, info) => {
 			results.push(storage.process(name, stream, info));
-			let fileProp = body[name];
+			const fileProp = body[name];
 			if (!fileProp) {
 				body[name] = JSON.stringify(info);
-			} else if (!Array.isArray(fileProp)) {
-				fileProp = [fileProp, JSON.stringify(info)];
-			} else {
-				fileProp.push(JSON.stringify(info));
+				return;
 			}
+			if (Array.isArray(fileProp)) {
+				fileProp.push(JSON.stringify(info));
+				return;
+			}
+			body[name] = [fileProp, JSON.stringify(info)];
 		});
 		bus.on("field", (name, value) => {
 			body[name] = parseField(name, value);
@@ -45,20 +47,22 @@ const formDataParser = async (instance, options) => {
 		const body = request.body;
 		const files = request.__files__;
 		if (files?.length) {
-			const newBody = {};
+			const fileFields = {};
 			for (const file of files) {
 				const field = file.field;
 				delete file.field;
-				let fileProp = newBody[field];
+				const fileProp = fileFields[field];
 				if (!fileProp) {
-					newBody[field] = file;
-				} else if (!Array.isArray(fileProp)) {
-					fileProp = [fileProp, file];
-				} else {
-					fileProp.push(file);
+					fileFields[field] = file;
+					continue;
 				}
+				if (Array.isArray(fileProp)) {
+					fileProp.push(file);
+					continue;
+				}
+				fileFields[field] = [fileProp, file];
 			}
-			Object.assign(body, newBody);
+			Object.assign(body, fileFields);
 		}
 		delete request.__files__;
 	});
