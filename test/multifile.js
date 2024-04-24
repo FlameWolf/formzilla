@@ -1,7 +1,7 @@
 "use strict";
 
 const setup = require("./setup-multifile");
-const tap = require("tap");
+const test = require("ava");
 const { Readable } = require("stream");
 const { once } = require("events");
 const formData = require("form-data");
@@ -23,11 +23,10 @@ async function sendRequest(instance) {
 	form.append("file", fs.createReadStream(filePath));
 	form.append("files", fs.createReadStream(filePath));
 	form.append("files", fs.createReadStream(filePath));
-	form.append("files", fs.createReadStream(filePath));
 	return form.pipe(req);
 }
 
-tap.test("should allow multiple files in one field", async t => {
+test("should allow multiple files in one field", async t => {
 	const instance = require("fastify").fastify();
 	t.teardown(async () => {
 		await instance.close();
@@ -35,16 +34,16 @@ tap.test("should allow multiple files in one field", async t => {
 	try {
 		instance.addHook("onResponse", async (request, reply) => {
 			const requestBody = request.body;
-			t.isArray(requestBody.files);
-			t.ok(requestBody.files[0].stream instanceof Readable);
-			t.ok(requestBody.files[1].stream instanceof Readable);
-			t.equal(reply.statusCode, 200);
+			t.true(requestBody.files instanceof Array);
+			t.true(requestBody.files[0].stream instanceof Readable);
+			t.true(requestBody.files[1].stream instanceof Readable);
+			t.is(reply.statusCode, 200);
 		});
 		await setup(instance, undefined, false);
 		const req = await sendRequest(instance);
 		const [res] = await once(req, "response");
 		res.resume();
 	} catch (err) {
-		console.log(err);
+		t.fail(err.message);
 	}
 });
