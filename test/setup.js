@@ -2,7 +2,6 @@
 
 const formDataParser = require("../index");
 const formData = require("form-data");
-const http = require("http");
 const path = require("path");
 const fs = require("fs");
 
@@ -45,17 +44,8 @@ module.exports = async function (instance, options = undefined, includeSchema = 
 	);
 	await instance.listen({ port: 0, host: "::" });
 	const form = new formData();
-	const req = http.request({
-		protocol: "http:",
-		hostname: "localhost",
-		port: instance.server.address().port,
-		path: "/",
-		headers: form.getHeaders(),
-		method: "POST"
-	});
-	const filePath = path.join(__dirname, "chequer.png");
 	form.append("name", "Jane Doe");
-	form.append("avatar", fs.createReadStream(filePath));
+	form.append("avatar", fs.createReadStream(path.join(__dirname, "chequer.png")));
 	form.append("age", 31);
 	form.append(
 		"address",
@@ -64,5 +54,13 @@ module.exports = async function (instance, options = undefined, includeSchema = 
 			street: "First Street"
 		})
 	);
-	return form.pipe(req);
+	return await instance.inject({
+		protocol: "http:",
+		hostname: "localhost",
+		port: instance.server.address().port,
+		path: "/",
+		headers: form.getHeaders(),
+		method: "POST",
+		payload: form
+	});
 };

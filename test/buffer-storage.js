@@ -4,7 +4,6 @@ const setup = require("./setup");
 const test = require("ava");
 const { Buffer } = require("buffer");
 const { BufferStorage } = require("../BufferStorage");
-const { once } = require("events");
 
 test("should store file as buffer and populate request body", async t => {
 	const instance = require("fastify").fastify();
@@ -20,9 +19,7 @@ test("should store file as buffer and populate request body", async t => {
 			t.is(typeof requestBody.address, "object");
 			t.is(reply.statusCode, 200);
 		});
-		const req = await setup(instance, { storage: new BufferStorage() });
-		const [res] = await once(req, "response");
-		res.resume();
+		await setup(instance, { storage: new BufferStorage() });
 	} catch (err) {
 		t.fail(err.message);
 	}

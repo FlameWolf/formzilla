@@ -19,9 +19,7 @@ test("should parse fields as strings when there is no schema", async t => {
 			t.is(typeof requestBody.address, "string");
 			t.is(reply.statusCode, 200);
 		});
-		const req = await setup(instance, undefined, false);
-		const [res] = await once(req, "response");
-		res.resume();
+		await setup(instance, undefined, false);
 	} catch (err) {
 		t.fail(err.message);
 	}

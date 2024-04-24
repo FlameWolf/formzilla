@@ -1,16 +1,15 @@
 "use strict";
 
 const formDataParser = require("../index");
+const formData = require("form-data");
+const path = require("path");
+const fs = require("fs");
 
 const requestSchema = {
 	consumes: ["multipart/form-data"],
 	body: {
 		type: "object",
 		properties: {
-			file: {
-				type: "string",
-				format: "binary"
-			},
 			files: {
 				type: "array",
 				items: {
@@ -33,4 +32,17 @@ module.exports = async function (instance, options = undefined, includeSchema = 
 		}
 	);
 	await instance.listen({ port: 0, host: "::" });
+	const form = new formData();
+	const stream = fs.createReadStream(path.join(__dirname, "chequer.png"));
+	form.append("files", stream);
+	form.append("files", stream);
+	return await instance.inject({
+		protocol: "http:",
+		hostname: "localhost",
+		port: instance.server.address().port,
+		path: "/",
+		headers: form.getHeaders(),
+		method: "POST",
+		payload: form
+	});
 };

@@ -4,7 +4,6 @@ const setup = require("./setup");
 const test = require("ava");
 const { CallbackStorage } = require("../CallbackStorage");
 const { FileInternal } = require("../FileInternal");
-const { once } = require("events");
 
 test("should pass file stream to callback and populate request body", async t => {
 	const instance = require("fastify").fastify();
@@ -20,7 +19,7 @@ test("should pass file stream to callback and populate request body", async t =>
 			t.is(typeof requestBody.address, "object");
 			t.is(reply.statusCode, 200);
 		});
-		const req = await setup(instance, {
+		await setup(instance, {
 			storage: new CallbackStorage((name, stream, info) => {
 				const file = new FileInternal(name, info);
 				const data = [];
@@ -31,8 +30,6 @@ test("should pass file stream to callback and populate request body", async t =>
 				return file;
 			})
 		});
-		const [res] = await once(req, "response");
-		res.resume();
 	} catch (err) {
 		t.fail(err.message);
 	}
