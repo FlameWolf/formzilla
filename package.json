@@ -35,5 +35,10 @@
 		"@types/busboy": "^1.5.3",
 		"ava": "^6.1.2",
 		"form-data": "^4.0.0"
+	},
+	"ava": {
+		"files": [
+			"!test/setup*.js"
+		]
 	}
 }
