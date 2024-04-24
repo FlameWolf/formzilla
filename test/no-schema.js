@@ -3,7 +3,6 @@
 const setup = require("./setup");
 const test = require("ava");
 const { Readable } = require("stream");
-const { once } = require("events");
 
 test("should parse fields as strings when there is no schema", async t => {
 	const instance = require("fastify").fastify();
