@@ -1,6 +1,6 @@
 {
 	"name": "formzilla",
-	"version": "3.2.13",
+	"version": "3.2.14",
 	"description": "Fastify plugin for parsing multipart/form data",
 	"main": "index.js",
 	"scripts": {

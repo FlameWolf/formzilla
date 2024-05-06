@@ -1,8 +1,8 @@
 "use strict";
 
 const { StreamStorage } = require("./StreamStorage");
-const { FieldParserNoSchema } = require("./FieldParserNoSchema");
 const { FieldParserWithSchema } = require("./FieldParserWithSchema");
+const { FieldParserNoSchema } = require("./FieldParserNoSchema");
 const busboy = require("busboy");
 const { finished } = require("stream");
 
