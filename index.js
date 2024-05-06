@@ -1,23 +1,18 @@
 "use strict";
 
 const { StreamStorage } = require("./StreamStorage");
+const { FieldParserNoSchema } = require("./FieldParserNoSchema");
+const { FieldParserWithSchema } = require("./FieldParserWithSchema");
 const busboy = require("busboy");
 const { finished } = require("stream");
 
-const tryParse = value => {
-	try {
-		return JSON.parse(value);
-	} catch {
-		return value;
-	}
-};
 const formDataParser = async (instance, options) => {
 	const { limits, storage = new StreamStorage() } = options;
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
 		const results = [];
 		const body = new Map();
 		const props = request.routeOptions.schema?.body?.properties;
-		const parseField = props ? (name, value) => (props[name]?.type === "string" ? value : tryParse(value)) : (name, value) => value;
+		const parser = props ? new FieldParserWithSchema(props) : new FieldParserNoSchema();
 		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
 		bus.on("file", (name, stream, info) => {
 			results.push(storage.process(name, stream, info));
@@ -33,7 +28,7 @@ const formDataParser = async (instance, options) => {
 			body.set(name, [fileProp, JSON.stringify(info)]);
 		});
 		bus.on("field", (name, value) => {
-			body.set(name, parseField(name, value));
+			body.set(name, parser.parseField(name, value));
 		});
 		finished(bus, (err = null) => {
 			Promise.all(results).then(files => {

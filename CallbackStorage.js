@@ -1,12 +1,12 @@
 "use strict";
 
 class CallbackStorage {
-	callback;
+	#callback;
 	constructor(callback) {
-		this.callback = callback;
+		this.#callback = callback;
 	}
 	process(name, stream, info) {
-		return this.callback(name, stream, info);
+		return this.#callback(name, stream, info);
 	}
 }
 

@@ -15,7 +15,7 @@ export interface File {
 	data: Buffer | undefined;
 	error: Error | undefined;
 }
-export declare type FileHandler = (name: string, stream: Readable, info: FileInfo) => File | Promise<File>;
+export type FileHandler = (name: string, stream: Readable, info: FileInfo) => File | Promise<File>;
 export interface StorageOption {
 	process: FileHandler;
 }
@@ -23,12 +23,15 @@ export interface FileSaveTarget {
 	directory?: string;
 	fileName?: string;
 }
-export declare type TargetType = FileSaveTarget | ((source: File) => FileSaveTarget);
+export type TargetType = FileSaveTarget | ((source: File) => FileSaveTarget);
 export interface FormDataParserPluginOptions extends FastifyPluginOptions {
 	limits?: Limits;
 	storage?: StorageOption;
 }
-export declare type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOptions> & Dictionary;
+export type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOptions> & Dictionary;
+export interface FieldParser {
+	parseField(name: string, value: any): any;
+}
 declare module "fastify" {
 	interface FastifyRequest {
 		__files__?: Array<File>;
