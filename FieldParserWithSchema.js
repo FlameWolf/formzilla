@@ -1,12 +1,12 @@
 "use strict";
 
 class FieldParserWithSchema {
-	#props;
+	props;
 	constructor(props) {
-		this.#props = props;
+		this.props = props;
 	}
 	parseField(name, value) {
-		if (this.#props[name]?.type !== "string") {
+		if (this.props[name]?.type !== "string") {
 			try {
 				return JSON.parse(value);
 			} catch {
