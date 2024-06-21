@@ -102,7 +102,7 @@ I guess this goes without saying, but you must register the plugin before regist
 
 ### Breaking changes from version 2
 
-1. Formzilla 3.x requires Fastify version 4.8 or above. Use Formzilla 2.x with Fastify versions below 4.8.
+1. Formzilla 2.x will not work with Fastify versions 4.8 and above. Use Formzilla 3.x with Fastify versions >= 4.8.
 
 ### Breaking changes from version 1
 

@@ -1,6 +1,6 @@
 {
 	"name": "formzilla",
-	"version": "3.2.15",
+	"version": "3.2.16",
 	"description": "Fastify plugin for parsing multipart/form data",
 	"main": "index.js",
 	"scripts": {
@@ -13,7 +13,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"busboy": "^1.6.0",
-		"fastify": "^4.26.2"
+		"fastify": "^4.28.0"
 	},
 	"keywords": [
 		"fastify",
