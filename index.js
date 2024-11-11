@@ -15,7 +15,11 @@ const formDataParser = async (instance, options) => {
 		const parser = props ? new FieldParserWithSchema(props) : new FieldParserNoSchema();
 		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
 		bus.on("file", (name, stream, info) => {
-			results.push(storage.process(name, stream, info));
+			try {
+				results.push(storage.process(name, stream, info));
+			} catch (err) {
+				done(err);
+			}
 			const fileProp = body[name];
 			if (!fileProp) {
 				body[name] = JSON.stringify(info);
