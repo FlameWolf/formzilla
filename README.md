@@ -73,8 +73,7 @@ server.register(fastifySwagger, {
 	mode: "dynamic",
 	openapi: {
 		info: {
-			title: "Fastify Playground",
-			description: "Testing Fastify features",
+			title: "Formzilla Demo",
 			version: "1.0.0"
 		}
 	}
