@@ -48,6 +48,7 @@ const formDataParser = async (instance, options) => {
 			const fileFields = Object.create(null);
 			for (const file of files) {
 				const field = file.field;
+				delete file.field;
 				const fileProp = fileFields[field];
 				if (!fileProp) {
 					fileFields[field] = file;

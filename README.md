@@ -39,52 +39,86 @@ const postCreateSchema = {
 You will find that neither `@fastify/multipart` nor `fastify-multer` will process this schema correctly, unless you add a `preValidation` hook to convert your request body into the correct schema. I created Formzilla to solve this exact problem.
 
 ```tsx
-import fastify, { FastifyInstance, FastifyRequest, FastifyReply, FastifyPluginOptions } from "fastify";
-import fastifySwagger from "@fastify/swagger";
+import fastify, { FastifyInstance } from "fastify";
 import formDataParser from "formzilla";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 
+const postCreateSchema = {
+	consumes: ["multipart/form-data"],
+	body: {
+		type: "object",
+		properties: {
+			content: {
+				type: "string"
+			},
+			media: {
+				type: "string",
+				format: "binary"
+			},
+			poll: {
+				type: "object",
+				properties: {
+					first: { type: "string" },
+					second: { type: "string" }
+				},
+				required: ["first", "second"]
+			}
+		}
+	}
+};
 const server: FastifyInstance = fastify({ logger: true });
+server.register(formDataParser);
 server.register(fastifySwagger, {
-	routePrefix: "/swagger",
-	exposeRoute: true,
+	mode: "dynamic",
 	openapi: {
 		info: {
-			title: "Formzilla Demo",
+			title: "Fastify Playground",
+			description: "Testing Fastify features",
 			version: "1.0.0"
 		}
 	}
 });
-server.register(formDataParser);
-server.register(
-	async (instance: FastifyInstance, options: FastifyPluginOptions) => {
-		instance.post(
-			"/create",
+server.register(fastifySwaggerUi, {
+	routePrefix: "/swagger"
+});
+server.register(async (instance, options) => {
+	instance.post("/create-post", {
+		schema: postCreateSchema,
+		handler: (request, reply) => {
+			console.log(request.body);
+			/*
+			request.body will look like this:
 			{
-				schema: postCreateSchema
-			},
-			(request: FastifyRequest, reply: FastifyReply) => {
-				console.log(request.body);
-				/*
-				request.body will look like this:
-				{
-					content: "Test.",
-					poll: { first: "Option 1", second: "Option 2" },
-					media: {
-						fileName: "flame-wolf.png",
-						encoding: "7bit",
-						mimeType: "image/png",
-						path?: <string>,		// Only when using DiscStorage
-						stream?: <Readable>		// Only when using StreamStorage
-						data?: <Buffer>			// Only when using BufferStorage
-						error?: <Error>			// Only if any errors occur during processing
-					}
+				content: "Test.",
+				poll: { first: "Option 1", second: "Option 2" },
+				media: {
+					originalName: "flame-wolf.png",
+					encoding: "7bit",
+					mimeType: "image/png",
+					path?: <string>,		// Only when using DiscStorage
+					stream?: <Readable>		// Only when using StreamStorage
+					data?: <Buffer>			// Only when using BufferStorage
+					error?: <Error>			// Only if any errors occur during processing
 				}
-				*/
-				reply.status(200).send();
 			}
-		);
+			*/
+			reply.status(200).send();
+		}
+	});
+});
+server.listen(
+	{
+		port: +(process.env.PORT as string) || 1024,
+		host: process.env.HOST || "::"
 	},
-	{ prefix: "/posts" }
+	(err, address) => {
+		if (err) {
+			console.log(err.message);
+			process.exit(1);
+		}
+		console.log(`Listening on ${address}`);
+	}
 );
 ```
 
