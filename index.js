@@ -25,12 +25,11 @@ const formDataParser = async (instance, options) => {
 		});
 		bus.on("file", (name, stream, info) => {
 			stream.on("limit", () => {
-				done(
-					new Error("File size limit exceeded", {
-						field: name,
-						...info
-					})
-				);
+				done({
+					message: "File size limit exceeded",
+					field: name,
+					...info
+				});
 			});
 			try {
 				results.push(storage.process(name, stream, info));
