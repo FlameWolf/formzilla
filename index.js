@@ -14,7 +14,24 @@ const formDataParser = async (instance, options) => {
 		const props = request.routeOptions.schema?.body?.properties;
 		const parser = props ? new FieldParserWithSchema(props) : new FieldParserNoSchema();
 		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
+		bus.on("partsLimit", () => {
+			done(new Error("Parts limit exceeded"));
+		});
+		bus.on("filesLimit", () => {
+			done(new Error("Files limit exceeded"));
+		});
+		bus.on("fieldsLimit", () => {
+			done(new Error("Fields limit exceeded"));
+		});
 		bus.on("file", (name, stream, info) => {
+			stream.on("limit", () => {
+				done(
+					new Error("File size limit exceeded", {
+						field: name,
+						...info
+					})
+				);
+			});
 			try {
 				results.push(storage.process(name, stream, info));
 			} catch (err) {
