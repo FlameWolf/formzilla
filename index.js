@@ -11,7 +11,8 @@ const formDataParser = async (instance, options) => {
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
 		const results = [];
 		const body = Object.create(null);
-		const props = request.routeOptions.schema?.body?.properties;
+		const schemaBody = request.routeOptions.schema?.body;
+		const props = schemaBody && (schemaBody.content?.["multipart/form-data"]?.schema?.properties || schemaBody.properties);
 		const parser = props ? new FieldParserWithSchema(props) : new FieldParserNoSchema();
 		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
 		bus.on("partsLimit", () => {
