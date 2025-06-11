@@ -1,6 +1,6 @@
 {
 	"name": "formzilla",
-	"version": "3.5.4",
+	"version": "3.5.5",
 	"description": "Fastify plugin for parsing multipart/form data",
 	"main": "index.js",
 	"scripts": {
@@ -32,9 +32,9 @@
 	],
 	"devDependencies": {
 		"@types/busboy": "^1.5.4",
-		"ava": "^6.3.0",
-		"fastify": "^5.3.2",
-		"form-data": "^4.0.2"
+		"ava": "^6.4.0",
+		"fastify": "^5.3.3",
+		"form-data": "^4.0.3"
 	},
 	"ava": {
 		"files": [
