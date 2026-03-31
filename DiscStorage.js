@@ -9,7 +9,9 @@ const fs = require("fs");
 class DiscStorage {
 	target;
 	constructor(target) {
-		this.target = target;
+		Promise.resolve(target).then(result => {
+			this.target = result;
+		});
 	}
 	process(name, stream, info) {
 		const target = this.target;
