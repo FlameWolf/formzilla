@@ -23,7 +23,7 @@ export interface FileSaveTarget {
 	directory?: string;
 	fileName?: string;
 }
-export type TargetType = FileSaveTarget | ((source: File) => FileSaveTarget);
+export type TargetType = FileSaveTarget | ((source: File) => FileSaveTarget | Promise<FileSaveTarget>);
 export interface FormDataParserPluginOptions extends FastifyPluginOptions {
 	limits?: Limits;
 	storage?: StorageOption;
