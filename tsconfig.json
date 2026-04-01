@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "NodeNext",
+		"esModuleInterop": true,
+		"verbatimModuleSyntax": true,
+		"allowImportingTsExtensions": true,
+		"rewriteRelativeImportExtensions": true,
+		"declaration": true,
+		"resolveJsonModule": true,
+		"outDir": "./dist",
+		"newLine": "lf",
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"typeRoots": ["./types", "./node_modules/@types"]
+	},
+	"ts-node": {
+		"transpileOnly": true
+	}
+}

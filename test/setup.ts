@@ -1,9 +1,12 @@
 "use strict";
 
-const formDataParser = require("../index");
-const formData = require("form-data");
-const path = require("path");
-const fs = require("fs");
+import formDataParser from "../index.ts";
+import FormData from "form-data";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const requestSchema = {
 	consumes: ["multipart/form-data"],
@@ -31,19 +34,19 @@ const requestSchema = {
 		}
 	}
 };
-module.exports = async function (instance, options = undefined, includeSchema = true) {
-	instance.register(formDataParser, options);
+export default async function (instance: any, options: any | undefined = undefined, includeSchema = true) {
+	instance.register(formDataParser, options as any);
 	instance.post(
 		"/",
 		{
-			schema: includeSchema && requestSchema
+			schema: (includeSchema && requestSchema) as any
 		},
-		async (request, reply) => {
+		async (request: any, reply: any) => {
 			reply.status(200).send();
 		}
 	);
 	await instance.listen({ port: 0, host: "::" });
-	const form = new formData();
+	const form = new FormData();
 	form.append("name", "Jane Doe");
 	form.append("avatar", fs.createReadStream(path.join(__dirname, "chequer.png")));
 	form.append("age", 31);
@@ -55,12 +58,9 @@ module.exports = async function (instance, options = undefined, includeSchema = 
 		})
 	);
 	return await instance.inject({
-		protocol: "http:",
-		hostname: "localhost",
-		port: instance.server.address().port,
 		path: "/",
 		headers: form.getHeaders(),
 		method: "POST",
 		payload: form
 	});
-};
+}

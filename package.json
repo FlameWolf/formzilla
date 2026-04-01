@@ -1,10 +1,44 @@
 {
 	"name": "formzilla",
-	"version": "3.6.1",
+	"version": "4.0.0",
 	"description": "Fastify plugin for parsing multipart/form data",
-	"main": "index.js",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./BufferStorage": {
+			"types": "./dist/BufferStorage.d.ts",
+			"import": "./dist/BufferStorage.js"
+		},
+		"./CallbackStorage": {
+			"types": "./dist/CallbackStorage.d.ts",
+			"import": "./dist/CallbackStorage.js"
+		},
+		"./DiscStorage": {
+			"types": "./dist/DiscStorage.d.ts",
+			"import": "./dist/DiscStorage.js"
+		},
+		"./StreamStorage": {
+			"types": "./dist/StreamStorage.d.ts",
+			"import": "./dist/StreamStorage.js"
+		},
+		"./FileInternal": {
+			"types": "./dist/FileInternal.d.ts",
+			"import": "./dist/FileInternal.js"
+		}
+	},
+	"files": [
+		"dist",
+		"!dist/test"
+	],
 	"scripts": {
-		"test": "ava"
+		"build": "tsc",
+		"pretest": "tsc && node -e \"require('fs').cpSync('test/chequer.png','dist/test/chequer.png')\"",
+		"test": "ava dist/test/**/*.js"
 	},
 	"author": "FlameWolf",
 	"repository": {
@@ -32,13 +66,15 @@
 	],
 	"devDependencies": {
 		"@types/busboy": "^1.5.4",
+		"@types/node": "^25.5.0",
 		"ava": "^7.0.0",
-		"fastify": "^5.7.4",
-		"form-data": "^4.0.5"
+		"fastify": "^5.8.4",
+		"form-data": "^4.0.5",
+		"typescript": "^6.0.2"
 	},
 	"ava": {
 		"files": [
-			"!test/setup*.js"
+			"!**/setup*.js"
 		]
 	}
 }
