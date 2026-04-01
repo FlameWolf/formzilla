@@ -1,44 +1,45 @@
 {
 	"name": "formzilla",
-	"version": "4.0.0",
+	"version": "4.0.1",
 	"description": "Fastify plugin for parsing multipart/form data",
 	"type": "module",
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"main": "./index.js",
+	"types": "./index.d.ts",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+			"types": "./index.d.ts",
+			"import": "./index.js"
 		},
 		"./BufferStorage": {
-			"types": "./dist/BufferStorage.d.ts",
-			"import": "./dist/BufferStorage.js"
+			"types": "./BufferStorage.d.ts",
+			"import": "./BufferStorage.js"
 		},
 		"./CallbackStorage": {
-			"types": "./dist/CallbackStorage.d.ts",
-			"import": "./dist/CallbackStorage.js"
+			"types": "./CallbackStorage.d.ts",
+			"import": "./CallbackStorage.js"
 		},
 		"./DiscStorage": {
-			"types": "./dist/DiscStorage.d.ts",
-			"import": "./dist/DiscStorage.js"
+			"types": "./DiscStorage.d.ts",
+			"import": "./DiscStorage.js"
 		},
 		"./StreamStorage": {
-			"types": "./dist/StreamStorage.d.ts",
-			"import": "./dist/StreamStorage.js"
+			"types": "./StreamStorage.d.ts",
+			"import": "./StreamStorage.js"
 		},
 		"./FileInternal": {
-			"types": "./dist/FileInternal.d.ts",
-			"import": "./dist/FileInternal.js"
+			"types": "./FileInternal.d.ts",
+			"import": "./FileInternal.js"
 		}
 	},
 	"files": [
-		"dist",
-		"!dist/test"
+		"!test",
+		"!**/*.ts",
+		"**/*.d.ts"
 	],
 	"scripts": {
 		"build": "tsc",
-		"pretest": "tsc && node -e \"require('fs').cpSync('test/chequer.png','dist/test/chequer.png')\"",
-		"test": "ava dist/test/**/*.js"
+		"pretest": "tsc",
+		"test": "ava test/**/*.js"
 	},
 	"author": "FlameWolf",
 	"repository": {

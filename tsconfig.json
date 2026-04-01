@@ -8,7 +8,6 @@
 		"rewriteRelativeImportExtensions": true,
 		"declaration": true,
 		"resolveJsonModule": true,
-		"outDir": "./dist",
 		"newLine": "lf",
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
