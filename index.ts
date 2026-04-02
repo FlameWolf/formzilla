@@ -7,6 +7,11 @@ import { FieldParserWithSchema } from "./FieldParserWithSchema.ts";
 import { StreamStorage } from "./StreamStorage.ts";
 import type { FastifyInstance, FastifyPluginAsync, FastifyPluginOptions } from "fastify";
 
+export { BufferStorage } from "./BufferStorage.ts";
+export { CallbackStorage } from "./CallbackStorage.ts";
+export { DiscStorage } from "./DiscStorage.ts";
+export { StreamStorage } from "./StreamStorage.ts";
+
 export interface Dictionary extends Object {
 	[key: string | symbol]: any;
 }
