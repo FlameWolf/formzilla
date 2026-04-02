@@ -1,6 +1,6 @@
 "use strict";
 
-import formDataParser from "../index.ts";
+import formDataParser, { type Dictionary } from "../index.ts";
 import FormData from "form-data";
 import path from "path";
 import fs from "fs";
@@ -24,11 +24,11 @@ const requestSchema = {
 	}
 };
 export default async function (instance: any, options: any | undefined = undefined, includeSchema = true) {
-	instance.register(formDataParser, options as any);
+	instance.register(formDataParser, options as Dictionary);
 	instance.post(
 		"/",
 		{
-			schema: (includeSchema && requestSchema) as any
+			schema: (includeSchema && requestSchema) as Dictionary
 		},
 		async (request: any, reply: any) => {
 			reply.status(200).send();

@@ -6,7 +6,7 @@ import { CallbackStorage } from "../CallbackStorage.ts";
 import { FileInternal } from "../FileInternal.ts";
 import type { Dictionary } from "../index.ts";
 
-test("should pass file stream to callback and populate request body", async (t: any) => {
+test("should pass file stream to callback and populate request body", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();
 	t.teardown(async () => {
@@ -14,7 +14,7 @@ test("should pass file stream to callback and populate request body", async (t: 
 	});
 	try {
 		instance.addHook("onResponse", async (request, reply) => {
-			const requestBody = request.body as any;
+			const requestBody = request.body as Dictionary;
 			t.is(typeof requestBody.name, "string");
 			t.is(typeof requestBody.avatar, "object");
 			t.is(typeof requestBody.age, "number");

@@ -6,7 +6,7 @@ import { Buffer } from "buffer";
 import { BufferStorage } from "../BufferStorage.ts";
 import type { Dictionary } from "../index.ts";
 
-test("should store file as buffer and populate request body", async (t: any) => {
+test("should store file as buffer and populate request body", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();
 	t.teardown(async () => {
@@ -14,7 +14,7 @@ test("should store file as buffer and populate request body", async (t: any) => 
 	});
 	try {
 		instance.addHook("onResponse", async (request, reply) => {
-			const requestBody = request.body as any;
+			const requestBody = request.body as Dictionary;
 			t.is(typeof requestBody.name, "string");
 			t.true(requestBody.avatar.data instanceof Buffer);
 			t.is(typeof requestBody.age, "number");

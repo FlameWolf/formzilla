@@ -5,7 +5,7 @@ import test from "ava";
 import { DiscStorage } from "../DiscStorage.ts";
 import type { Dictionary } from "../index.ts";
 
-test("should save file to disc and populate request body", async (t: any) => {
+test("should save file to disc and populate request body", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();
 	t.teardown(async () => {
@@ -13,7 +13,7 @@ test("should save file to disc and populate request body", async (t: any) => {
 	});
 	try {
 		instance.addHook("onResponse", async (request, reply) => {
-			const requestBody = request.body as any;
+			const requestBody = request.body as Dictionary;
 			t.is(typeof requestBody.name, "string");
 			t.is(typeof requestBody.avatar.path, "string");
 			t.is(typeof requestBody.age, "number");
@@ -25,7 +25,7 @@ test("should save file to disc and populate request body", async (t: any) => {
 		t.fail(err.message);
 	}
 });
-test("should read file save target from function", async (t: any) => {
+test("should read file save target from function", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();
 	t.teardown(async () => {
@@ -33,7 +33,7 @@ test("should read file save target from function", async (t: any) => {
 	});
 	try {
 		instance.addHook("onResponse", async (request, reply) => {
-			const requestBody = request.body as any;
+			const requestBody = request.body as Dictionary;
 			t.is(typeof requestBody.name, "string");
 			t.is(typeof requestBody.avatar.path, "string");
 			t.is(typeof requestBody.age, "number");
@@ -51,7 +51,7 @@ test("should read file save target from function", async (t: any) => {
 		t.fail(err.message);
 	}
 });
-test("should read file save target from async function", async (t: any) => {
+test("should read file save target from async function", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();
 	t.teardown(async () => {
@@ -59,7 +59,7 @@ test("should read file save target from async function", async (t: any) => {
 	});
 	try {
 		instance.addHook("onResponse", async (request, reply) => {
-			const requestBody = request.body as any;
+			const requestBody = request.body as Dictionary;
 			t.is(typeof requestBody.name, "string");
 			t.is(typeof requestBody.avatar.path, "string");
 			t.is(typeof requestBody.age, "number");
