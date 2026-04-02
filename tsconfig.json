@@ -11,10 +11,6 @@
 		"newLine": "lf",
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
-		"skipLibCheck": true,
-		"typeRoots": ["./types", "./node_modules/@types"]
-	},
-	"ts-node": {
-		"transpileOnly": true
+		"skipLibCheck": true
 	}
 }

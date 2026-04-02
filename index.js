@@ -4,6 +4,13 @@ import { Readable, finished } from "stream";
 import { FieldParserNoSchema } from "./FieldParserNoSchema.js";
 import { FieldParserWithSchema } from "./FieldParserWithSchema.js";
 import { StreamStorage } from "./StreamStorage.js";
+export { BufferStorage } from "./BufferStorage.js";
+export { CallbackStorage } from "./CallbackStorage.js";
+export { DiscStorage } from "./DiscStorage.js";
+export { StreamStorage } from "./StreamStorage.js";
+export { FileInternal } from "./FileInternal.js";
+export { FieldParserNoSchema } from "./FieldParserNoSchema.js";
+export { FieldParserWithSchema } from "./FieldParserWithSchema.js";
 const formDataParser = async (instance, options) => {
 	const { limits, storage = new StreamStorage() } = options;
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {

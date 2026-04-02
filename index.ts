@@ -37,13 +37,19 @@ export type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOption
 export interface FieldParser {
 	parseField(name: string, value: any): any;
 }
+export { BufferStorage } from "./BufferStorage.ts";
+export { CallbackStorage } from "./CallbackStorage.ts";
+export { DiscStorage } from "./DiscStorage.ts";
+export { StreamStorage } from "./StreamStorage.ts";
+export { FileInternal } from "./FileInternal.ts";
+export { FieldParserNoSchema } from "./FieldParserNoSchema.ts";
+export { FieldParserWithSchema } from "./FieldParserWithSchema.ts";
 
 declare global {
 	interface Error {
 		[key: string | symbol]: any | undefined;
 	}
 }
-
 declare module "fastify" {
 	interface FastifyRequest {
 		__files__?: Array<FormzillaFile>;
