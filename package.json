@@ -1,14 +1,14 @@
 {
 	"name": "formzilla",
-	"version": "4.0.5",
+	"version": "4.0.6",
 	"description": "Fastify plugin for parsing multipart/form data",
 	"type": "module",
 	"main": "index.js",
 	"files": [
-		"!test",
 		"!**/*.ts",
 		"**/*.js",
-		"**/*.d.ts"
+		"**/*.d.ts",
+		"!test"
 	],
 	"scripts": {
 		"build": "tsc",
