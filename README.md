@@ -4,7 +4,7 @@ Formzilla is a [Fastify](http://fastify.io/) plugin to handle `multipart/form-da
 
 # Why?
 
-Even though other plugins for the same purpose exist, like [@fastify/multipart][1] and [fastify-multer][2], when dealing with mixed content, they don't play well with JSON schemas which are Fastify's built-in mechanism for request validation and documentation. Formzilla is intended to work seamlessly with JSON schemas and [@fastify-swagger][3].
+Even though other plugins for the same purpose exist, like [@fastify/multipart][1] and [fastify-multer][2], when dealing with mixed content, they don't play well with JSON schemas which are Fastify's built-in mechanism for request validation and documentation. Formzilla is intended to work seamlessly with JSON schemas and [@fastify/swagger][3].
 
 # Example
 
@@ -96,8 +96,8 @@ server.register(async (instance, options) => {
 					encoding: "7bit",
 					mimeType: "image/png",
 					path?: <string>,		// Only when using DiscStorage
-					stream?: <Readable>		// Only when using StreamStorage
-					data?: <Buffer>			// Only when using BufferStorage
+					stream?: <Readable>,	// Only when using StreamStorage
+					data?: <Buffer>,		// Only when using BufferStorage
 					error?: <Error>			// Only if any errors occur during processing
 				}
 			}
@@ -150,13 +150,13 @@ These are the valid keys for the `options` object parameter accepted by Formzill
 
     ```tsx
     const formLimits = {
-    	fieldNameSize?: number, // Max field name size (in bytes). Default: 100.
-    	fieldSize?: number, // Max field value size (in bytes). Default: 1048576 (1MB).
-    	fields?: number, // Max number of non-file fields. Default: Infinity.
-    	fileSize?: number, // For multipart forms, the max file size (in bytes). Default: Infinity.
-    	files?: number, // For multipart forms, the max number of file fields. Default: Infinity.
-    	parts?: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
-    	headerPairs?: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
+    	fieldNameSize: number, // Max field name size (in bytes). Default: 100.
+    	fieldSize: number, // Max field value size (in bytes). Default: 1048576 (1MB).
+    	fields: number, // Max number of non-file fields. Default: Infinity.
+    	fileSize: number, // For multipart forms, the max file size (in bytes). Default: Infinity.
+    	files: number, // For multipart forms, the max number of file fields. Default: Infinity.
+    	parts: number, // For multipart forms, the max number of parts (fields + files). Default: Infinity.
+    	headerPairs: number // For multipart forms, the max number of header key-value pairs to parse. Default: 2000 (same as node's http module).
     };
     server.register(formDataParser, {
     	limits: formLimits
@@ -214,7 +214,11 @@ These are the valid keys for the `options` object parameter accepted by Formzill
 
 # Recommendations
 
-Both `StreamStorage` and `BufferStorage` will cause files to accumulate in memory and hence make your endpoint a potential target for DDoS attacks. `CallbackStorage` must cosume the stream inside the callback or it will break the application. It is recommended only if you are familiar with streams in NodeJS and want to manipulate the stream in some way before sending it to the response body. It's recommended to use `DiscStorage` to temporarily store an incoming file, upload it to a cloud server like [Cloudinary][5] from your request handler, and then delete the temporary file.
+Despite its name, `StreamStorage` does not stream end-to-end — the full file is buffered in a `PassThrough` before the handler runs. Both `StreamStorage` and `BufferStorage` therefore hold the entire file in memory, making your endpoint vulnerable to memory-exhaustion (DoS) attacks from large or concurrent uploads.
+
+`CallbackStorage` must consume the stream inside the callback, otherwise the request will stall. It is recommended only if you are comfortable with `Node.js` streams and need to transform or pipe the upload to another destination (e.g. a cloud bucket) without touching disc.
+
+For most use cases, prefer `DiscStorage`: write the file to a temporary location, upload it to a cloud provider like [Cloudinary][5] from your handler, then delete the temp file.
 
 # Caveats
 
