@@ -16,6 +16,7 @@ export interface FormzillaFile {
 }
 export type FileHandler = (name: string, stream: Readable, info: FileInfo) => FormzillaFile | Promise<FormzillaFile>;
 export interface StorageOption {
+	lazy?: Boolean;
 	process: FileHandler;
 }
 export interface FileSaveTarget {

@@ -1,17 +1,17 @@
 "use strict";
-import { Readable, PassThrough, finished } from "stream";
+import { Readable, PassThrough } from "stream";
 import { FileInternal } from "./FileInternal.js";
 export class StreamStorage {
+	lazy = true;
 	process(name, stream, info) {
 		const file = new FileInternal(name, info);
-		const delegateStream = new PassThrough();
-		return new Promise(resolve => {
-			finished(stream, err => {
-				file.error = err;
-				file.stream = delegateStream;
-				resolve(file);
-			});
-			stream.on("data", chunk => delegateStream.push(chunk));
+		const proxy = new PassThrough();
+		stream.pipe(proxy);
+		stream.on("error", err => {
+			file.error = err;
+			proxy.destroy(err);
 		});
+		file.stream = proxy;
+		return file;
 	}
 }

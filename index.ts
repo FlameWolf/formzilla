@@ -22,6 +22,7 @@ export interface FormzillaFile {
 }
 export type FileHandler = (name: string, stream: Readable, info: FileInfo) => FormzillaFile | Promise<FormzillaFile>;
 export interface StorageOption {
+	lazy?: Boolean;
 	process: FileHandler;
 }
 export interface FileSaveTarget {
@@ -102,11 +103,19 @@ const formDataParser: FastifyPluginAsync = async (instance: FastifyInstance, opt
 		bus.on("field", (name, value) => {
 			body[name] = parser.parseField(name, value);
 		});
-		finished(bus, (err = null) => {
+		bus.on("error", (err: Error) => {
+			done(err, body);
+		});
+		bus.on("close", () => {
 			Promise.all(results).then(files => {
 				request.__files__ = files;
-				done(err, body);
+				done(null, body);
 			});
+		});
+		bus.on("end", () => {
+			if (storage.lazy) {
+				bus.emit("close");
+			}
 		});
 		message.pipe(bus);
 	});
