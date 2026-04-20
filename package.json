@@ -1,6 +1,6 @@
 {
 	"name": "formzilla",
-	"version": "5.0.3",
+	"version": "5.0.4",
 	"description": "Fastify plugin for parsing multipart/form data",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -10,7 +10,7 @@
 	],
 	"scripts": {
 		"build": "tsc",
-		"pretest": "tsc && copyfiles -u 1 \"src/**/*.png\" dist",
+		"pretest": "copyfiles -u 1 \"src/**/*.png\" dist",
 		"test": "ava dist/test/**/*.js"
 	},
 	"author": "FlameWolf",
