@@ -1,6 +1,6 @@
 {
 	"name": "formzilla",
-	"version": "5.0.6",
+	"version": "5.0.7",
 	"description": "Fastify plugin for parsing multipart/form data",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -10,7 +10,8 @@
 	],
 	"scripts": {
 		"build": "tsc",
-		"pretest": "copyfiles -u 1 \"src/**/*.png\" dist",
+		"postbuild": "node -e \"require('fs').copyFileSync('dist.package.json', 'dist/package.json')\"",
+		"pretest": "node -e \"require('fs').copyFileSync('src/test/chequer.png', 'dist/test/chequer.png')\"",
 		"test": "ava dist/test/**/*.js"
 	},
 	"author": "FlameWolf",
@@ -41,7 +42,6 @@
 		"@types/busboy": "^1.5.4",
 		"@types/node": "^25.5.0",
 		"ava": "^7.0.0",
-		"copyfiles": "^2.4.1",
 		"fastify": "^5.8.4",
 		"form-data": "^4.0.5",
 		"typescript": "^6.0.2"
