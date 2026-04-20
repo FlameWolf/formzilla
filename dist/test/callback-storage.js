@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 import formDataParser from "../index.js";
 import { CallbackStorage } from "../CallbackStorage.js";
 import { FileInternal } from "../FileInternal.js";
-import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "./setup.js";
+import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "../test/setup.js";
 test("CallbackStorage passes file stream to callback and populates request body", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();

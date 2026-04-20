@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 import FormData from "form-data";
 import formDataParser from "../index.js";
 import { BufferStorage } from "../BufferStorage.js";
-import { assertHandlerOk, injectForm } from "./setup.js";
+import { assertHandlerOk, injectForm } from "../test/setup.js";
 test("accepts an empty file upload and exposes a zero-length buffer", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();

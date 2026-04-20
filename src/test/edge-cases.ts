@@ -5,7 +5,7 @@ import { Buffer } from "buffer";
 import FormData from "form-data";
 import formDataParser, { type Dictionary } from "../index.ts";
 import { BufferStorage } from "../BufferStorage.ts";
-import { assertHandlerOk, injectForm } from "./setup.ts";
+import { assertHandlerOk, injectForm } from "../test/setup.js";
 
 test("accepts an empty file upload and exposes a zero-length buffer", async t => {
 	const { fastify } = await import("fastify");

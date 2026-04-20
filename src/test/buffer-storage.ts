@@ -1,26 +1,26 @@
 "use strict";
 
 import test from "ava";
-import { Readable } from "stream";
+import { Buffer } from "buffer";
 import formDataParser, { type Dictionary } from "../index.ts";
-import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "./setup.ts";
+import { BufferStorage } from "../BufferStorage.ts";
+import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "../test/setup.ts";
 
-test("StreamStorage (default) exposes file as Readable stream", async t => {
+test("BufferStorage stores file as buffer and populates request body", async t => {
 	const { fastify } = await import("fastify");
 	const instance: any = fastify();
 	t.teardown(() => instance.close());
-	instance.register(formDataParser);
+	instance.register(formDataParser, { storage: new BufferStorage() });
 	instance.post("/", { schema: requestSchema }, async (request: any, reply: any) => {
 		const body = request.body as Dictionary;
 		t.is(typeof body.name, "string");
-		t.true(body.avatar.stream instanceof Readable);
-		const chunks: Array<Buffer> = [];
-		for await (const chunk of body.avatar.stream) {
-			chunks.push(chunk as Buffer);
-		}
-		t.true(Buffer.concat(chunks).length > 0);
+		t.true(body.avatar.data instanceof Buffer);
+		t.true(body.avatar.data.length > 0);
+		t.is(body.avatar.mimeType, "image/png");
 		t.is(typeof body.age, "number");
+		t.is(body.age, 31);
 		t.is(typeof body.address, "object");
+		t.is(body.address.id, "316 A");
 		reply.code(200).send();
 	});
 	const res = await injectForm(instance, buildStandardForm());

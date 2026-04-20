@@ -5,7 +5,7 @@ import { Buffer } from "buffer";
 import formDataParser, { type Dictionary } from "../index.ts";
 import { CallbackStorage } from "../CallbackStorage.ts";
 import { FileInternal } from "../FileInternal.ts";
-import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "./setup.ts";
+import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "../test/setup.js";
 
 test("CallbackStorage passes file stream to callback and populates request body", async t => {
 	const { fastify } = await import("fastify");

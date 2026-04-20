@@ -3,7 +3,7 @@ import test from "ava";
 import { Buffer } from "buffer";
 import formDataParser from "../index.js";
 import { BufferStorage } from "../BufferStorage.js";
-import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "./setup.js";
+import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "../test/setup.js";
 test("BufferStorage stores file as buffer and populates request body", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();

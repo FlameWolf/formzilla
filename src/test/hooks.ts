@@ -1,21 +1,23 @@
 "use strict";
+
 import test from "ava";
-import formDataParser from "../index.js";
-import { BufferStorage } from "../BufferStorage.js";
-import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "./setup.js";
+import formDataParser, { type Dictionary } from "../index.ts";
+import { BufferStorage } from "../BufferStorage.ts";
+import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "../test/setup.js";
+
 test("__files__ is populated in preValidation and removed before the handler runs", async t => {
 	const { fastify } = await import("fastify");
-	const instance = fastify();
+	const instance: any = fastify();
 	t.teardown(() => instance.close());
-	let filesInPreValidation = "not-set";
-	let filesInHandler = "not-set";
+	let filesInPreValidation: any = "not-set";
+	let filesInHandler: any = "not-set";
 	instance.register(formDataParser, { storage: new BufferStorage() });
-	instance.addHook("preValidation", async request => {
+	instance.addHook("preValidation", async (request: any) => {
 		filesInPreValidation = request.__files__;
 	});
-	instance.post("/", { schema: requestSchema }, async (request, reply) => {
+	instance.post("/", { schema: requestSchema }, async (request: any, reply: any) => {
 		filesInHandler = request.__files__;
-		const body = request.body;
+		const body = request.body as Dictionary;
 		t.truthy(body.avatar);
 		reply.code(200).send();
 	});

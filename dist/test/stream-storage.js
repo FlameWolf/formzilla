@@ -2,7 +2,7 @@
 import test from "ava";
 import { Readable } from "stream";
 import formDataParser from "../index.js";
-import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "./setup.js";
+import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "../test/setup.js";
 test("StreamStorage (default) exposes file as Readable stream", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();

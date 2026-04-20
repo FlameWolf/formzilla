@@ -1,27 +1,73 @@
 "use strict";
-import busboy from "busboy";
-import { Readable, finished } from "stream";
-import { FieldParserNoSchema } from "./FieldParserNoSchema.js";
-import { FieldParserWithSchema } from "./FieldParserWithSchema.js";
-import { StreamStorage } from "./StreamStorage.js";
-export { BufferStorage } from "./BufferStorage.js";
-export { CallbackStorage } from "./CallbackStorage.js";
-export { DiscStorage } from "./DiscStorage.js";
-export { StreamStorage } from "./StreamStorage.js";
-export { FileInternal } from "./FileInternal.js";
-export { FieldParserNoSchema } from "./FieldParserNoSchema.js";
-export { FieldParserWithSchema } from "./FieldParserWithSchema.js";
-const formDataParser = async (instance, options) => {
+
+import busboy, { type FileInfo, type Limits } from "busboy";
+import { Readable } from "stream";
+import { FieldParserNoSchema } from "./FieldParserNoSchema.ts";
+import { FieldParserWithSchema } from "./FieldParserWithSchema.ts";
+import { StreamStorage } from "./StreamStorage.ts";
+import type { FastifyInstance, FastifyPluginAsync, FastifyPluginOptions } from "fastify";
+
+export interface Dictionary extends Object {
+	[key: string | symbol]: any;
+}
+export interface FormzillaFile {
+	field: string | undefined;
+	originalName: string;
+	encoding: string;
+	mimeType: string;
+	path: string | undefined;
+	stream: Readable | undefined;
+	data: Buffer | undefined;
+	error: Error | null | undefined;
+}
+export type FileHandler = (name: string, stream: Readable, info: FileInfo) => FormzillaFile | Promise<FormzillaFile>;
+export interface StorageOption {
+	lazy?: Boolean;
+	process: FileHandler;
+}
+export interface FileSaveTarget {
+	directory?: string;
+	fileName?: string;
+}
+export type TargetType = FileSaveTarget | ((source: FormzillaFile) => FileSaveTarget | Promise<FileSaveTarget>);
+export interface FormDataParserPluginOptions extends FastifyPluginOptions {
+	limits?: Limits;
+	storage?: StorageOption;
+}
+export type FormDataParserPlugin = FastifyPluginAsync<FormDataParserPluginOptions> & Dictionary;
+export interface FieldParser {
+	parseField(name: string, value: any): any;
+}
+export { BufferStorage } from "./BufferStorage.ts";
+export { CallbackStorage } from "./CallbackStorage.ts";
+export { DiscStorage } from "./DiscStorage.ts";
+export { StreamStorage } from "./StreamStorage.ts";
+export { FileInternal } from "./FileInternal.ts";
+export { FieldParserNoSchema } from "./FieldParserNoSchema.ts";
+export { FieldParserWithSchema } from "./FieldParserWithSchema.ts";
+
+declare global {
+	interface Error {
+		[key: string | symbol]: any | undefined;
+	}
+}
+declare module "fastify" {
+	interface FastifyRequest {
+		__files__?: Array<FormzillaFile>;
+	}
+}
+
+const formDataParser: FastifyPluginAsync = async (instance: FastifyInstance, options: FormDataParserPluginOptions) => {
 	const { limits, storage = new StreamStorage() } = options;
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
 		let settled = false;
-		const results = new Array();
+		const results = new Array<any>();
 		const body = Object.create(null);
-		const schemaBody = request.routeOptions.schema?.body;
+		const schemaBody = request.routeOptions.schema?.body as Dictionary;
 		const props = schemaBody && (schemaBody.content?.["multipart/form-data"]?.schema?.properties || schemaBody.properties);
 		const parser = props ? new FieldParserWithSchema(props) : new FieldParserNoSchema();
 		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
-		const finish = (err, body) => {
+		const finish = (err: Error | null, body?: any) => {
 			if (settled) {
 				return;
 			}
@@ -52,7 +98,7 @@ const formDataParser = async (instance, options) => {
 			});
 			try {
 				results.push(storage.process(name, stream, info));
-			} catch (err) {
+			} catch (err: any) {
 				stream.resume();
 				finish(err);
 			}
@@ -79,7 +125,7 @@ const formDataParser = async (instance, options) => {
 			}
 			body[name] = [fieldProp, parser.parseField(name, value)];
 		});
-		bus.on("error", err => {
+		bus.on("error", (err: Error) => {
 			finish(err, body);
 		});
 		bus.on("close", () => {
@@ -100,9 +146,9 @@ const formDataParser = async (instance, options) => {
 	instance.addHook("preHandler", async request => {
 		const files = request.__files__;
 		if (files?.length) {
-			const fileFields = Object.create(null);
+			const fileFields = Object.create(null) as Dictionary;
 			for (const file of files) {
-				const field = file.field;
+				const field = file.field as string;
 				delete file.field;
 				const fileProp = fileFields[field];
 				if (!fileProp) {
@@ -115,10 +161,11 @@ const formDataParser = async (instance, options) => {
 				}
 				fileFields[field] = [fileProp, file];
 			}
-			Object.assign(request.body, fileFields);
+			Object.assign(request.body as Dictionary, fileFields);
 		}
 		delete request.__files__;
 	});
 };
-formDataParser[Symbol.for("skip-override")] = true;
+(formDataParser as Dictionary)[Symbol.for("skip-override")] = true;
+
 export default formDataParser;

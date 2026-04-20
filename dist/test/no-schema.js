@@ -2,7 +2,7 @@
 import test from "ava";
 import { Readable } from "stream";
 import formDataParser from "../index.js";
-import { assertHandlerOk, buildStandardForm, injectForm } from "./setup.js";
+import { assertHandlerOk, buildStandardForm, injectForm } from "../test/setup.js";
 test("fields are treated as raw strings when no schema is provided", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();

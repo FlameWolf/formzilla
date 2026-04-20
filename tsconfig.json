@@ -2,6 +2,8 @@
 	"compilerOptions": {
 		"target": "ESNext",
 		"module": "NodeNext",
+		"rootDir": "./src",
+		"outDir": "./dist",
 		"esModuleInterop": true,
 		"verbatimModuleSyntax": true,
 		"allowImportingTsExtensions": true,
@@ -12,5 +14,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"skipLibCheck": true
-	}
+	},
+	"include": ["./src/**/*"]
 }
