@@ -1,24 +1,26 @@
 "use strict";
-import setup from "./setup.js";
 import test from "ava";
 import { Readable } from "stream";
-test("should store file as stream and populate request body", async t => {
+import formDataParser from "../index.js";
+import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "./setup.js";
+test("StreamStorage (default) exposes file as Readable stream", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();
-	t.teardown(async () => {
-		await instance.close();
+	t.teardown(() => instance.close());
+	instance.register(formDataParser);
+	instance.post("/", { schema: requestSchema }, async (request, reply) => {
+		const body = request.body;
+		t.is(typeof body.name, "string");
+		t.true(body.avatar.stream instanceof Readable);
+		const chunks = [];
+		for await (const chunk of body.avatar.stream) {
+			chunks.push(chunk);
+		}
+		t.true(Buffer.concat(chunks).length > 0);
+		t.is(typeof body.age, "number");
+		t.is(typeof body.address, "object");
+		reply.code(200).send();
 	});
-	try {
-		instance.addHook("onResponse", async (request, reply) => {
-			const requestBody = request.body;
-			t.is(typeof requestBody.name, "string");
-			t.true(requestBody.avatar.stream instanceof Readable);
-			t.is(typeof requestBody.age, "number");
-			t.is(typeof requestBody.address, "object");
-			t.is(reply.statusCode, 200);
-		});
-		await setup(instance);
-	} catch (err) {
-		t.fail(err.message);
-	}
+	const res = await injectForm(instance, buildStandardForm());
+	assertHandlerOk(t, res);
 });

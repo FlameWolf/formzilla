@@ -8,13 +8,23 @@ export class FieldParserWithSchema implements FieldParser {
 		this.props = props;
 	}
 	parseField(name: string, value: any) {
-		if (this.props[name]?.type !== "string") {
-			try {
-				return JSON.parse(value);
-			} catch {
-				void 0;
-			}
+		const prop = this.props[name];
+		if (!prop || prop.type === "string") {
+			return value;
 		}
-		return value;
+		try {
+			switch (prop.type) {
+				case "object":
+				case "array":
+				case "integer":
+				case "number":
+				case "boolean":
+					return JSON.parse(value);
+				default:
+					return value;
+			}
+		} catch {
+			return value;
+		}
 	}
 }

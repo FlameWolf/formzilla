@@ -1,35 +1,41 @@
 "use strict";
-import setup from "./setup.js";
 import test from "ava";
+import { Buffer } from "buffer";
+import formDataParser from "../index.js";
 import { CallbackStorage } from "../CallbackStorage.js";
 import { FileInternal } from "../FileInternal.js";
-test("should pass file stream to callback and populate request body", async t => {
+import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "./setup.js";
+test("CallbackStorage passes file stream to callback and populates request body", async t => {
 	const { fastify } = await import("fastify");
 	const instance = fastify();
-	t.teardown(async () => {
-		await instance.close();
-	});
-	try {
-		instance.addHook("onResponse", async (request, reply) => {
-			const requestBody = request.body;
-			t.is(typeof requestBody.name, "string");
-			t.is(typeof requestBody.avatar, "object");
-			t.is(typeof requestBody.age, "number");
-			t.is(typeof requestBody.address, "object");
-			t.is(reply.statusCode, 200);
-		});
-		await setup(instance, {
-			storage: new CallbackStorage((name, stream, info) => {
+	t.teardown(() => instance.close());
+	instance.register(formDataParser, {
+		storage: new CallbackStorage((name, stream, info) => {
+			return new Promise(resolve => {
 				const file = new FileInternal(name, info);
-				const data = new Array();
-				stream.on("data", chunk => data.push(chunk));
-				stream.on("close", () => {
-					file.data = Buffer.concat(data);
+				const chunks = [];
+				stream.on("data", chunk => chunks.push(chunk));
+				stream.on("end", () => {
+					file.data = Buffer.concat(chunks);
+					resolve(file);
 				});
-				return file;
-			})
-		});
-	} catch (err) {
-		t.fail(err.message);
-	}
+				stream.on("error", err => {
+					file.error = err;
+					resolve(file);
+				});
+			});
+		})
+	});
+	instance.post("/", { schema: requestSchema }, async (request, reply) => {
+		const body = request.body;
+		t.is(typeof body.name, "string");
+		t.is(typeof body.avatar, "object");
+		t.true(body.avatar.data instanceof Buffer);
+		t.true(body.avatar.data.length > 0);
+		t.is(typeof body.age, "number");
+		t.is(typeof body.address, "object");
+		reply.code(200).send();
+	});
+	const res = await injectForm(instance, buildStandardForm());
+	assertHandlerOk(t, res);
 });

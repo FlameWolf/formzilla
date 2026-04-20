@@ -1,6 +1,5 @@
 "use strict";
 
-import formDataParser, { type Dictionary } from "../index.ts";
 import FormData from "form-data";
 import path from "path";
 import fs from "fs";
@@ -8,7 +7,9 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const requestSchema = {
+export const sampleFilePath = path.join(__dirname, "chequer.png");
+
+export const requestSchema = {
 	consumes: ["multipart/form-data"],
 	body: {
 		type: "object",
@@ -34,21 +35,27 @@ const requestSchema = {
 		}
 	}
 };
-export default async function (instance: any, options: any | undefined = undefined, includeSchema = true) {
-	instance.register(formDataParser, options as Dictionary);
-	instance.post(
-		"/",
-		{
-			schema: (includeSchema && requestSchema) as Dictionary
-		},
-		async (request: any, reply: any) => {
-			reply.status(200).send();
+
+export const multifileSchema = {
+	consumes: ["multipart/form-data"],
+	body: {
+		type: "object",
+		properties: {
+			files: {
+				type: "array",
+				items: {
+					type: "string",
+					format: "binary"
+				}
+			}
 		}
-	);
-	await instance.listen({ port: 0, host: "::" });
+	}
+};
+
+export function buildStandardForm() {
 	const form = new FormData();
 	form.append("name", "Jane Doe");
-	form.append("avatar", fs.createReadStream(path.join(__dirname, "chequer.png")));
+	form.append("avatar", fs.createReadStream(sampleFilePath));
 	form.append("age", 31);
 	form.append(
 		"address",
@@ -57,10 +64,28 @@ export default async function (instance: any, options: any | undefined = undefin
 			street: "First Street"
 		})
 	);
+	return form;
+}
+
+export function buildMultifileForm() {
+	const form = new FormData();
+	form.append("files", fs.createReadStream(sampleFilePath));
+	form.append("files", fs.createReadStream(sampleFilePath));
+	return form;
+}
+
+export async function injectForm(instance: any, form: FormData) {
 	return await instance.inject({
 		path: "/",
-		headers: form.getHeaders(),
 		method: "POST",
+		headers: form.getHeaders(),
 		payload: form
 	});
+}
+
+export function assertHandlerOk(t: any, res: any) {
+	if (res.statusCode !== 200) {
+		t.fail(`Handler returned ${res.statusCode}: ${res.body}`);
+	}
+	t.is(res.statusCode, 200);
 }

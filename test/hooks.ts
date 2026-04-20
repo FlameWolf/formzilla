@@ -1,28 +1,30 @@
 "use strict";
 
 import test from "ava";
-import { Buffer } from "buffer";
 import formDataParser, { type Dictionary } from "../index.ts";
 import { BufferStorage } from "../BufferStorage.ts";
 import { assertHandlerOk, buildStandardForm, injectForm, requestSchema } from "./setup.ts";
 
-test("BufferStorage stores file as buffer and populates request body", async t => {
+test("__files__ is populated in preValidation and removed before the handler runs", async t => {
 	const { fastify } = await import("fastify");
 	const instance: any = fastify();
 	t.teardown(() => instance.close());
+	let filesInPreValidation: any = "not-set";
+	let filesInHandler: any = "not-set";
 	instance.register(formDataParser, { storage: new BufferStorage() });
+	instance.addHook("preValidation", async (request: any) => {
+		filesInPreValidation = request.__files__;
+	});
 	instance.post("/", { schema: requestSchema }, async (request: any, reply: any) => {
+		filesInHandler = request.__files__;
 		const body = request.body as Dictionary;
-		t.is(typeof body.name, "string");
-		t.true(body.avatar.data instanceof Buffer);
-		t.true(body.avatar.data.length > 0);
-		t.is(body.avatar.mimeType, "image/png");
-		t.is(typeof body.age, "number");
-		t.is(body.age, 31);
-		t.is(typeof body.address, "object");
-		t.is(body.address.id, "316 A");
+		t.truthy(body.avatar);
 		reply.code(200).send();
 	});
 	const res = await injectForm(instance, buildStandardForm());
 	assertHandlerOk(t, res);
+	t.true(Array.isArray(filesInPreValidation));
+	t.is(filesInPreValidation.length, 1);
+	t.is(filesInPreValidation[0].originalName, "chequer.png");
+	t.is(filesInHandler, undefined);
 });

@@ -1,27 +1,26 @@
 "use strict";
 
-import setup from "./setup.ts";
 import test from "ava";
 import { Readable } from "stream";
-import type { Dictionary } from "../index.ts";
+import formDataParser, { type Dictionary } from "../index.ts";
+import { assertHandlerOk, buildStandardForm, injectForm } from "./setup.ts";
 
-test("should parse fields as strings when there is no schema", async t => {
+test("fields are treated as raw strings when no schema is provided", async t => {
 	const { fastify } = await import("fastify");
-	const instance = fastify();
-	t.teardown(async () => {
-		await instance.close();
+	const instance: any = fastify();
+	t.teardown(() => instance.close());
+	instance.register(formDataParser);
+	instance.post("/", async (request: any, reply: any) => {
+		const body = request.body as Dictionary;
+		t.is(typeof body.name, "string");
+		t.true(body.avatar.stream instanceof Readable);
+		t.is(typeof body.age, "string");
+		t.is(body.age, "31");
+		t.is(typeof body.address, "string");
+		// drain stream so busboy can complete
+		body.avatar.stream.resume();
+		reply.code(200).send();
 	});
-	try {
-		instance.addHook("onResponse", async (request, reply) => {
-			const requestBody = request.body as Dictionary;
-			t.is(typeof requestBody.name, "string");
-			t.true(requestBody.avatar.stream instanceof Readable);
-			t.is(typeof requestBody.age, "string");
-			t.is(typeof requestBody.address, "string");
-			t.is(reply.statusCode, 200);
-		});
-		await setup(instance, undefined, false);
-	} catch (err: any) {
-		t.fail(err.message);
-	}
+	const res = await injectForm(instance, buildStandardForm());
+	assertHandlerOk(t, res);
 });

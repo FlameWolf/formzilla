@@ -60,24 +60,36 @@ declare module "fastify" {
 const formDataParser: FastifyPluginAsync = async (instance: FastifyInstance, options: FormDataParserPluginOptions) => {
 	const { limits, storage = new StreamStorage() } = options;
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
+		let settled = false;
 		const results = new Array<any>();
 		const body = Object.create(null);
 		const schemaBody = request.routeOptions.schema?.body as Dictionary;
 		const props = schemaBody && (schemaBody.content?.["multipart/form-data"]?.schema?.properties || schemaBody.properties);
 		const parser = props ? new FieldParserWithSchema(props) : new FieldParserNoSchema();
 		const bus = busboy({ headers: message.headers, limits, defParamCharset: "utf8" });
+		const finish = (err: Error | null, body?: any) => {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			if (err) {
+				message.unpipe(bus);
+				bus.destroy();
+			}
+			done(err, body);
+		};
 		bus.on("partsLimit", () => {
-			done(new Error("Parts limit exceeded"));
+			finish(new Error("Parts limit exceeded"));
 		});
 		bus.on("filesLimit", () => {
-			done(new Error("Files limit exceeded"));
+			finish(new Error("Files limit exceeded"));
 		});
 		bus.on("fieldsLimit", () => {
-			done(new Error("Fields limit exceeded"));
+			finish(new Error("Fields limit exceeded"));
 		});
 		bus.on("file", (name, stream, info) => {
 			stream.on("limit", () => {
-				done({
+				finish({
 					name: "Bad input",
 					message: "File size limit exceeded",
 					field: name,
@@ -87,7 +99,8 @@ const formDataParser: FastifyPluginAsync = async (instance: FastifyInstance, opt
 			try {
 				results.push(storage.process(name, stream, info));
 			} catch (err: any) {
-				done(err);
+				stream.resume();
+				finish(err);
 			}
 			const fileProp = body[name];
 			if (!fileProp) {
@@ -101,22 +114,33 @@ const formDataParser: FastifyPluginAsync = async (instance: FastifyInstance, opt
 			body[name] = [fileProp, JSON.stringify(info)];
 		});
 		bus.on("field", (name, value) => {
-			body[name] = parser.parseField(name, value);
+			const fieldProp = body[name];
+			if (!fieldProp) {
+				body[name] = parser.parseField(name, value);
+				return;
+			}
+			if (Array.isArray(fieldProp)) {
+				fieldProp.push(parser.parseField(name, value));
+				return;
+			}
+			body[name] = [fieldProp, parser.parseField(name, value)];
 		});
 		bus.on("error", (err: Error) => {
-			done(err, body);
+			finish(err, body);
 		});
 		bus.on("close", () => {
-			Promise.all(results).then(files => {
-				request.__files__ = files;
-				done(null, body);
-			});
+			Promise.all(results)
+				.then(files => {
+					request.__files__ = files;
+					finish(null, body);
+				})
+				.catch(err => finish(err, body));
 		});
-		bus.on("end", () => {
-			if (storage.lazy) {
-				bus.emit("close");
-			}
-		});
+		// bus.on("end", () => {
+		// 	if (storage.lazy) {
+		// 		bus.emit("close");
+		// 	}
+		// });
 		message.pipe(bus);
 	});
 	instance.addHook("preHandler", async request => {

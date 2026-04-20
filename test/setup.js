@@ -1,11 +1,11 @@
 "use strict";
-import formDataParser from "../index.js";
 import FormData from "form-data";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const requestSchema = {
+export const sampleFilePath = path.join(__dirname, "chequer.png");
+export const requestSchema = {
 	consumes: ["multipart/form-data"],
 	body: {
 		type: "object",
@@ -31,21 +31,25 @@ const requestSchema = {
 		}
 	}
 };
-export default async function (instance, options = undefined, includeSchema = true) {
-	instance.register(formDataParser, options);
-	instance.post(
-		"/",
-		{
-			schema: includeSchema && requestSchema
-		},
-		async (request, reply) => {
-			reply.status(200).send();
+export const multifileSchema = {
+	consumes: ["multipart/form-data"],
+	body: {
+		type: "object",
+		properties: {
+			files: {
+				type: "array",
+				items: {
+					type: "string",
+					format: "binary"
+				}
+			}
 		}
-	);
-	await instance.listen({ port: 0, host: "::" });
+	}
+};
+export function buildStandardForm() {
 	const form = new FormData();
 	form.append("name", "Jane Doe");
-	form.append("avatar", fs.createReadStream(path.join(__dirname, "chequer.png")));
+	form.append("avatar", fs.createReadStream(sampleFilePath));
 	form.append("age", 31);
 	form.append(
 		"address",
@@ -54,10 +58,25 @@ export default async function (instance, options = undefined, includeSchema = tr
 			street: "First Street"
 		})
 	);
+	return form;
+}
+export function buildMultifileForm() {
+	const form = new FormData();
+	form.append("files", fs.createReadStream(sampleFilePath));
+	form.append("files", fs.createReadStream(sampleFilePath));
+	return form;
+}
+export async function injectForm(instance, form) {
 	return await instance.inject({
 		path: "/",
-		headers: form.getHeaders(),
 		method: "POST",
+		headers: form.getHeaders(),
 		payload: form
 	});
+}
+export function assertHandlerOk(t, res) {
+	if (res.statusCode !== 200) {
+		t.fail(`Handler returned ${res.statusCode}: ${res.body}`);
+	}
+	t.is(res.statusCode, 200);
 }

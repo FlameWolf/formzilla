@@ -196,11 +196,13 @@ These are the valid keys for the `options` object parameter accepted by Formzill
         	storage: new DiscStorage(file => {
         		return {
         			directory: path.join(__dirname, "public"),
-        			fileName: file.originalName.toUpperCase()
+        			fileName: path.basename(file.originalName).toUpperCase()
         		};
         	})
         });
         ```
+
+        **Security note:** both `file.originalName` and any value you compute from it come from the client's multipart headers and may contain path separators or `..` segments. Always run the chosen `fileName` through `path.basename()` (and verify the resolved destination stays inside your intended directory) before returning it, or an attacker can write files outside the target directory.
 
     -   `CallbackStorage`: For advanced users. Accepts a callback function that takes three parameters: a `string`, a `Readable`, and a `busboy.FileInfo`. The callback function must consume the `Readable` and return either a `FormzillaFile` or a promise that resolves to a `FormzillaFile`. Example:
 

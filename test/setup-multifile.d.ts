@@ -1,1 +1,0 @@
-export default function (instance: any, options?: any | undefined, includeSchema?: boolean): Promise<any>;

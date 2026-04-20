@@ -1,26 +1,29 @@
 "use strict";
 
-import setupMultifile from "./setup-multifile.ts";
 import test from "ava";
 import { Readable } from "stream";
-import type { Dictionary } from "../index.ts";
+import formDataParser, { type Dictionary } from "../index.ts";
+import { assertHandlerOk, buildMultifileForm, injectForm, multifileSchema } from "./setup.ts";
 
-test("should allow multiple files in one field", async t => {
+test("StreamStorage collects multiple files under the same field name", async t => {
 	const { fastify } = await import("fastify");
-	const instance = fastify();
-	t.teardown(async () => {
-		await instance.close();
+	const instance: any = fastify();
+	t.teardown(() => instance.close());
+	instance.register(formDataParser);
+	instance.post("/", { schema: multifileSchema }, async (request: any, reply: any) => {
+		const body = request.body as Dictionary;
+		t.true(Array.isArray(body.files));
+		t.is(body.files.length, 2);
+		for (const file of body.files) {
+			t.true(file.stream instanceof Readable);
+			const chunks: Array<Buffer> = [];
+			for await (const chunk of file.stream) {
+				chunks.push(chunk as Buffer);
+			}
+			t.true(Buffer.concat(chunks).length > 0);
+		}
+		reply.code(200).send();
 	});
-	try {
-		instance.addHook("onResponse", async (request, reply) => {
-			const requestBody = request.body as Dictionary;
-			t.true(requestBody.files instanceof Array);
-			t.true(requestBody.files[0].stream instanceof Readable);
-			t.true(requestBody.files[1].stream instanceof Readable);
-			t.is(reply.statusCode, 200);
-		});
-		await setupMultifile(instance);
-	} catch (err: any) {
-		t.fail(err.message);
-	}
+	const res = await injectForm(instance, buildMultifileForm());
+	assertHandlerOk(t, res);
 });
