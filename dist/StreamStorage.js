@@ -4,20 +4,14 @@ import { FileInternal } from "./FileInternal.js";
 export class StreamStorage {
 	process(name, stream, info) {
 		const file = new FileInternal(name, info);
-		const proxy = new PassThrough();
+		const data = new Array();
 		return new Promise(resolve => {
 			finished(stream, err => {
 				file.error = err;
-				file.stream = proxy;
-				proxy.end();
+				file.stream = Readable.from(data);
 				resolve(file);
 			});
-			stream.on("data", chunk => {
-				if (!proxy.write(chunk)) {
-					stream.pause();
-				}
-			});
-			proxy.on("drain", () => stream.resume());
+			stream.on("data", chunk => data.push(chunk));
 		});
 	}
 }

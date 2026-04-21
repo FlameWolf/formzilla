@@ -8,20 +8,14 @@ import type { StorageOption } from "./index.ts";
 export class StreamStorage implements StorageOption {
 	process(name: string, stream: Readable, info: FileInfo): Promise<FileInternal> {
 		const file = new FileInternal(name, info);
-		const proxy = new PassThrough();
+		const data = new Array<any>();
 		return new Promise(resolve => {
 			finished(stream, err => {
 				file.error = err;
-				file.stream = proxy;
-				proxy.end();
+				file.stream = Readable.from(data);
 				resolve(file);
 			});
-			stream.on("data", chunk => {
-				if (!proxy.write(chunk)) {
-					stream.pause();
-				}
-			});
-			proxy.on("drain", () => stream.resume());
+			stream.on("data", chunk => data.push(chunk));
 		});
 	}
 }
