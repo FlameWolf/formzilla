@@ -11,7 +11,7 @@ export class StreamStorage {
 				file.stream = proxy;
 				resolve(file);
 			});
-			stream.on("data", chunk => proxy.push(chunk));
+			stream.pipe(proxy);
 		});
 	}
 }
