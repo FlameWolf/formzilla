@@ -60,7 +60,7 @@ const formDataParser: FastifyPluginAsync = async (instance: FastifyInstance, opt
 	const { limits, storage = new StreamStorage() } = options;
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
 		let settled = false;
-		const results = new Array<any>();
+		const results = new Array<FormzillaFile | Promise<FormzillaFile>>();
 		const body = Object.create(null);
 		const schemaBody = request.routeOptions.schema?.body as Dictionary;
 		const props = schemaBody && (schemaBody.content?.["multipart/form-data"]?.schema?.properties || schemaBody.properties);
