@@ -1,21 +1,21 @@
 "use strict";
 
-import { Readable, PassThrough } from "stream";
+import { Readable, PassThrough, finished } from "stream";
 import { FileInternal } from "./FileInternal.ts";
 import type { FileInfo } from "busboy";
-import type { FormzillaFile, StorageOption } from "./index.ts";
+import type { StorageOption } from "./index.ts";
 
 export class StreamStorage implements StorageOption {
-	lazy = true;
-	process(name: string, stream: Readable, info: FileInfo): FormzillaFile {
+	process(name: string, stream: Readable, info: FileInfo): Promise<FileInternal> {
 		const file = new FileInternal(name, info);
 		const proxy = new PassThrough();
-		stream.pipe(proxy);
-		stream.on("error", err => {
-			file.error = err;
-			proxy.destroy(err);
+		return new Promise(resolve => {
+			finished(stream, err => {
+				file.error = err;
+				file.stream = proxy;
+				resolve(file);
+			});
+			stream.on("data", chunk => proxy.push(chunk));
 		});
-		file.stream = proxy;
-		return file;
 	}
 }

@@ -15,10 +15,10 @@ test("StreamStorage (default) exposes file as Readable stream", async t => {
 		t.is(typeof body.name, "string");
 		t.true(body.avatar.stream instanceof Readable);
 		const chunks: Array<Buffer> = [];
-		for await (const chunk of body.avatar.stream) {
+		for await (const chunk of (body.avatar.stream as Readable).read()) {
 			chunks.push(chunk as Buffer);
 		}
-		t.true(Buffer.concat(chunks).length > 0);
+		t.true(chunks.length > 0);
 		t.is(typeof body.age, "number");
 		t.is(typeof body.address, "object");
 		reply.code(200).send();

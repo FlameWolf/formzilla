@@ -32,6 +32,19 @@ const formDataParser = async (instance, options) => {
 			}
 			done(err, body);
 		};
+		const populateField = (name, value, isFile = false) => {
+			const fieldProp = body[name];
+			const fieldValue = isFile ? JSON.stringify(value) : parser.parseField(name, value);
+			if (!fieldProp) {
+				body[name] = fieldValue;
+				return;
+			}
+			if (Array.isArray(fieldProp)) {
+				fieldProp.push(fieldValue);
+				return;
+			}
+			body[name] = [fieldProp, fieldValue];
+		};
 		bus.on("partsLimit", () => {
 			finish(new Error("Parts limit exceeded"));
 		});
@@ -56,28 +69,10 @@ const formDataParser = async (instance, options) => {
 				stream.resume();
 				finish(err);
 			}
-			const fileProp = body[name];
-			if (!fileProp) {
-				body[name] = JSON.stringify(info);
-				return;
-			}
-			if (Array.isArray(fileProp)) {
-				fileProp.push(JSON.stringify(info));
-				return;
-			}
-			body[name] = [fileProp, JSON.stringify(info)];
+			populateField(name, info, true);
 		});
 		bus.on("field", (name, value) => {
-			const fieldProp = body[name];
-			if (!fieldProp) {
-				body[name] = parser.parseField(name, value);
-				return;
-			}
-			if (Array.isArray(fieldProp)) {
-				fieldProp.push(parser.parseField(name, value));
-				return;
-			}
-			body[name] = [fieldProp, parser.parseField(name, value)];
+			populateField(name, value);
 		});
 		bus.on("error", err => {
 			finish(err, body);
@@ -88,13 +83,8 @@ const formDataParser = async (instance, options) => {
 					request.__files__ = files;
 					finish(null, body);
 				})
-				.catch(err => finish(err, body));
+				.catch(finish);
 		});
-		// bus.on("end", () => {
-		// 	if (storage.lazy) {
-		// 		bus.emit("close");
-		// 	}
-		// });
 		message.pipe(bus);
 	});
 	instance.addHook("preHandler", async request => {

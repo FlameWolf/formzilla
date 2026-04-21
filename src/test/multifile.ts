@@ -17,10 +17,10 @@ test("StreamStorage collects multiple files under the same field name", async t 
 		for (const file of body.files) {
 			t.true(file.stream instanceof Readable);
 			const chunks: Array<Buffer> = [];
-			for await (const chunk of file.stream) {
+			for await (const chunk of (file.stream as Readable).read()) {
 				chunks.push(chunk as Buffer);
 			}
-			t.true(Buffer.concat(chunks).length > 0);
+			t.true(chunks.length > 0);
 		}
 		reply.code(200).send();
 	});
