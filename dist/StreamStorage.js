@@ -9,9 +9,15 @@ export class StreamStorage {
 			finished(stream, err => {
 				file.error = err;
 				file.stream = proxy;
+				proxy.end();
 				resolve(file);
 			});
-			stream.on("data", chunk => proxy.write(chunk));
+			stream.on("data", chunk => {
+				if (!proxy.write(chunk)) {
+					stream.pause();
+				}
+			});
+			proxy.on("drain", () => stream.resume());
 		});
 	}
 }
