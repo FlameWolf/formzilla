@@ -48,5 +48,5 @@ declare module "fastify" {
 		__files__?: Array<FormzillaFile>;
 	}
 }
-declare const formDataParser: FastifyPluginAsync;
+declare const formDataParser: FormDataParserPlugin;
 export default formDataParser;

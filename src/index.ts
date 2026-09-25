@@ -56,7 +56,7 @@ declare module "fastify" {
 	}
 }
 
-const formDataParser: FastifyPluginAsync = async (instance: FastifyInstance, options: FormDataParserPluginOptions) => {
+const formDataParser: FormDataParserPlugin = async (instance: FastifyInstance, options: FormDataParserPluginOptions) => {
 	const { limits, storage = new StreamStorage() } = options;
 	instance.addContentTypeParser("multipart/form-data", (request, message, done) => {
 		let settled = false;
@@ -155,6 +155,6 @@ const formDataParser: FastifyPluginAsync = async (instance: FastifyInstance, opt
 		delete request.__files__;
 	});
 };
-(formDataParser as Dictionary)[Symbol.for("skip-override")] = true;
+formDataParser[Symbol.for("skip-override")] = true;
 
 export default formDataParser;
